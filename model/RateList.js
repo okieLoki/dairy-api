@@ -1,13 +1,29 @@
 const mongoose = require('mongoose')
 
 const rateListSchema = new mongoose.Schema({
+    type: {
+        type: String,
+        required: [true, 'Type missing'],
+        enum: ['KGFAT + KGSNF', 'KGFAT ONLY', 'FAT ONLY', 'FAT + SNF']
+    },
+    level : {
+        type: Number,
+        required: [true, 'Level missing'],
+        enum: [1, 2, 3, 4]
+    },
     rateChartName: {
         type: String,
         required: [true, 'Rate Chart Name missing']
     },
-    level : {
+    animal : {
         type: String,
-        required: [true, 'Level missing']
+        required: [true, 'Animal missing'],
+        enum: ['COW', 'BUFFALO', 'BOTH']
+    },
+    ratio : {
+        type: String,
+        required: [true, 'Ratio missing'],
+        enum: ['60:40', '52: 48', '50:50']
     },
     fat: {
         type: Number,
@@ -16,6 +32,10 @@ const rateListSchema = new mongoose.Schema({
     snf: {
         type: Number,
         required: [true, 'SNF missing']
+    },
+    rate: {
+        type: Number,
+        required: [true, 'Rate missing']
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,

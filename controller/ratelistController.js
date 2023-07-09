@@ -3,9 +3,9 @@ const jwt = require('jsonwebtoken')
 
 const addRateList = async (req, res) => {
     try {
-        const { rateChartName, level, fat, snf } = req.body
+        const {type, level, rateChartName, animal, ratio, fat, snf, rate} = req.body
 
-        if(!rateChartName || !level || !fat || !snf){
+        if(!type || !level || !rateChartName || !animal || !ratio || !fat || !snf || !rate){
             res.status(400).json({
                 error: 'Please provide all the details'
             })
