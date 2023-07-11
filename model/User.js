@@ -1,10 +1,11 @@
 const mongoose = require('mongoose')
 
 const userSchema = new mongoose.Schema({
-    email: {
-        type: String,
+    phoneNo: {
+        type: Number,
         unique: true,
-        required: [true, 'Email missing']
+        required: [true, 'Phone Number missing'],
+        minlength: 10,
     },
     name: {
         type: String,

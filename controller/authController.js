@@ -4,18 +4,24 @@ const jwt = require('jsonwebtoken')
 
 const register = async (req, res) => {
     try {
-        const { email, name, password } = req.body;
+        const { phoneNo, name, password } = req.body;
 
-        if (!email || !name || !password) {
+        if (!phoneNo || !name || !password) {
             return res.status(400).json({
                 error: 'Mandatory fields are missing',
             });
         }
-        const existingUser = await User.findOne({ email });
+        const existingUser = await User.findOne({ phoneNo: phoneNo });
 
         if (existingUser) {
             res.status(409).json({
                 error: 'User already exists',
+            });
+        }
+
+        if(phoneNo.toString().length !== 10){
+            res.status(400).json({
+                error: 'Phone Number should be of 10 digits',
             });
         }
 
@@ -26,7 +32,6 @@ const register = async (req, res) => {
         const token = jwt.sign(
             {
                 user_id: user._id,
-                email: user.email
             },
             process.env.SECRET_KEY,
             {
@@ -48,21 +53,20 @@ const register = async (req, res) => {
 const login = async (req, res) => {
 
     try {
-        const { email, password } = req.body
+        const { phoneNo, password } = req.body
 
-        if (!email || !password) {
+        if (!phoneNo || !password) {
             res.status(400).json({
-                status: 'Email or Password missing'
+                status: 'Phone Number or Password missing'
             })
         }
 
-        const user = await User.findOne({ email })
+        const user = await User.findOne({ phoneNo })
 
         if (user && (await bcrypt.compare(password, user.password))) {
             const token = jwt.sign(
                 {
-                    user_id: user._id,
-                    email: user.email
+                    user_id: user._id
                 },
                 process.env.SECRET_KEY,
                 {
@@ -75,7 +79,7 @@ const login = async (req, res) => {
             res.status(200).json(user)
         }
         res.status(400).json({
-            status: 'Email or status is incorrect'
+            status: 'Phone Number or token is incorrect'
         })
     } catch (error) {
         console.error(error);
