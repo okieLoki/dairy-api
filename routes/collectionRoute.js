@@ -4,6 +4,6 @@ const { addCollection, getAllCollections } = require('../controller/collectionCo
 const auth = require('../middleware/auth')
 
 router.post('/', auth, addCollection)
-//router.get('/', auth, getAllCollections)
+router.get('/', auth, getAllCollections)
 
 module.exports = router

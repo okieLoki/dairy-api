@@ -2,7 +2,21 @@
 
 This document provides information about the API endpoints.
 
-## User Signup
+## Table of Contents
+- [User Signup](#user-signup)
+- [User Login](#user-login)
+- [Add Rate List](#add-rate-list)
+- [Get All Rate Lists](#get-all-rate-lists)
+- [Add Farmer](#add-farmer)
+- [Get All Farmers](#get-all-farmers)
+- [Add Collection](#add-collection)
+- [Get All Collections](#get-all-collections)
+- [Get All Dues](#get-all-dues)
+- [Get Dues by Farmer ID](#get-dues-by-farmer-id)
+- [Settle All Dues](#settle-all-dues)
+- [Settle Farmer's Payment](#settle-farmers-payment)
+
+## User Signup <a name="user-signup"></a>
 
 Endpoint: `/api/user/signup`
 
@@ -34,39 +48,14 @@ Response Body:
 
 ##### Error Responses
 
-Status Code: `400`
+| Status Code | Response Body                                    |
+|-------------|-------------------------------------------------|
+| 400         | {"error": "Mandatory fields are missing"}       |
+| 400         | {"error": "Phone Number should be of 10 digits"}|
+| 409         | {"error": "User already exists"}                |
+| 500         | {"error": "An error occurred while processing the request"}|
 
-Response Body:
-```json
-{
-  "error": "Mandatory fields are missing"
-}
-```
-```json
-{
-  "error": "Phone Number should be of 10 digits"
-}
-```
-
-Status Code: `409`
-
-Response Body:
-```json
-{
-  "error": "User already exists"
-}
-```
-
-Status Code: `500`
-
-Response Body:
-```json
-{
-  "error": "An error occurred while processing the request"
-}
-```
-
-## User Login
+## User Login <a name="user-login"></a>
 
 Endpoint: `/api/user/login`
 
@@ -97,33 +86,15 @@ Response Body:
 
 ##### Error Responses
 
-Status Code: `400`
+| Status Code | Response Body                                    |
+|-------------|-------------------------------------------------|
+| 400         | {"status": "Phone Number or Password missing"}  |
+| 400         | {"status": "Phone Number or token is incorrect"}|
+| 500         | {"error": "An error occurred while processing the request"}|
 
-Response Body:
-```json
-{
-  "status": "Phone Number or Password missing"
-}
-```
-```json
-{
-  "status": "Phone Number or token is incorrect"
-}
-```
+Note: The access token returned in the response should be included in subsequent API requests as a bearer token in the `Authorization` header for authentication purposes.
 
-Status Code: `500`
-
-Response Body:
-```json
-{
-  "error": "An error occurred while processing the request"
-}
-```
-
-Note: The `access-token` returned in the response should be included in subsequent API requests as a bearer token in the `Authorization` header for authentication purposes.
-
-
-## Add Rate List
+## Add Rate List <a name="add-rate-list"></a>
 
 Endpoint: `/api/ratelist`
 
@@ -182,54 +153,17 @@ Response Body:
 
 ##### Error Responses
 
-Status Code: `400`
+| Status Code | Response Body                                    |
+|-------------|-------------------------------------------------|
+| 400         | {"error": "Mandatory fields are missing"}       |
+| 400         | {"error": "Rate List Already Exists"}            |
+| 400         | {"error": "Minimum FAT should be less than Maximum FAT"} |
+| 400         | {"error": "Minimum FAT/SNF should be less than Maximum FAT/SNF"} |
+| 400         | {"error": "Invalid Category"}                    |
+| 401         | {"error": "Unauthorized. Bearer token required."} |
+| 500         | {"error": "An error occurred while processing the request"} |
 
-Response Body:
-```json
-{
-  "error": "Mandatory fields are missing"
-}
-```
-```json
-{
-  "error": "Rate List Already Exists"
-}
-```
-```json
-{
-  "error": "Minimum FAT should be less than Maximum FAT"
-}
-```
-```json
-{
-  "error": "Minimum FAT/SNF should be less than Maximum FAT/SNF"
-}
-```
-```json
-{
-  "error": "Invalid Category"
-}
-```
-
-Status Code: `401`
-
-Response Body:
-```json
-{
-  "error": "Unauthorized. Bearer token required."
-}
-```
-
-Status Code: `500`
-
-Response Body:
-```json
-{
-  "error": "An error occurred while processing the request"
-}
-```
-
-### Get All Rate Lists
+## Get All Rate Lists <a name="get-all-rate-lists"></a>
 
 Endpoint: `/api/ratelist`
 
@@ -260,7 +194,9 @@ Response Body:
     "maxFat": 0.0,
     "fatIncrement": 0.0,
     "minSNF": 0.0,
-    "maxSNF": 0.0,
+    "maxSNF": 0.0
+
+,
     "snfIncrement": 0.0,
     "userId": "user-id"
   },
@@ -288,25 +224,12 @@ Response Body:
 
 ##### Error Response
 
-Status Code: `401`
+| Status Code | Response Body                                    |
+|-------------|-------------------------------------------------|
+| 401         | {"error": "Unauthorized. Bearer token required."} |
+| 500         | {"error": "An error occurred while processing the request"} |
 
-Response Body:
-```json
-{
-  "error": "Unauthorized. Bearer token required."
-}
-```
-
-Status Code: `500`
-
-Response Body:
-```json
-{
-  "error": "An error occurred while processing the request"
-}
-```
-
-## Add Farmer
+## Add Farmer <a name="add-farmer"></a>
 
 Endpoint: `/api/farmer`
 
@@ -353,40 +276,14 @@ Response Body:
 
 ##### Error Responses
 
-Status Code: `400`
+| Status Code | Response Body                                    |
+|-------------|-------------------------------------------------|
+| 400         | {"success": false, "message": "Missing required fields"} |
+| 400         | {"status": "Farmer Already Exists"}             |
+| 401         | {"error": "Unauthorized. Bearer token required."} |
+| 500         | {"error": "An error occurred while processing the request"} |
 
-Response Body:
-```json
-{
-  "success": false,
-  "message": "Missing required fields"
-}
-```
-```json
-{
-  "status": "Farmer Already Exists"
-}
-```
-
-Status Code: `401`
-
-Response Body:
-```json
-{
-  "error": "Unauthorized. Bearer token required."
-}
-```
-
-Status Code: `500`
-
-Response Body:
-```json
-{
-  "error": "An error occurred while processing the request"
-}
-```
-
-### Get All Farmers
+### Get All Farmers <a name="get-all-farmers"></a>
 
 Endpoint: `/api/farmer`
 
@@ -427,20 +324,263 @@ Response Body:
 
 ##### Error Response
 
-Status Code: `401`
+| Status Code | Response Body                                    |
+|-------------|-------------------------------------------------|
+| 401         | {"error": "Unauthorized. Bearer token required."} |
+| 500         | {"error": "An error occurred while processing the request"} |
+
+
+## Add Collection <a name="add-collection"></a>
+
+Endpoint: `/api/collection`
+
+Method: `POST`
+
+Requires authentication. The request must include a valid bearer token in the `Authorization` header.
+
+### Request Parameters
+
+| Parameter      | Type   | Required | Description                                |
+|----------------|--------|----------|--------------------------------------------|
+| farmerId       | string | Yes      | Farmer ID                                  |
+| rateChartName  | string | Yes      | Name of the rate chart                     |
+| qty            | number | Yes      | Quantity of collection                      |
+| fat            | number | Yes      | Fat content of the collection              |
+| snf            | number | Yes      | SNF (Solid-Not-Fat) content of the collection |
+
+### Response
+
+#### Success Response
+
+Status Code: `201`
 
 Response Body:
 ```json
 {
-  "error": "Unauthorized. Bearer token required."
+  "_id": "collection-id",
+  "farmerId": "farmer-id",
+  "rateChartName": "rate-chart-name",
+  "qty": 10,
+  "fat": 4.5,
+  "snf": 8.0,
+  "rate": 36.5,
+  "amount": 365.0,
+  "userId": "user-id"
 }
 ```
 
-Status Code: `500`
+#### Error Responses
+
+| Status Code | Response Body                                    |
+|-------------|-------------------------------------------------|
+| 400         | {"status": "Invalid Farmer ID or Rate Chart Name"} |
+| 400         | {"status": "No rate list found with this name"} |
+| 400         | {"status": "Invalid Rate Chart Category"} |
+| 401         | {"error": "Unauthorized. Bearer token required."} |
+| 500         | {"error": "An error occurred while processing the request"} |
+
+## Get All Collections <a name="get-all-collections"></a>
+
+Endpoint: `/api/collection`
+
+Method: `GET`
+
+Requires authentication. The request must include a valid bearer token in the `Authorization` header.
+
+### Response
+
+#### Success Response
+
+Status Code: `200`
+
+Response Body:
+```json
+[
+  {
+    "_id": "collection-id",
+    "farmerId": "farmer-id",
+    "rateChartName": "rate-chart-name",
+    "qty": 10,
+    "fat": 4.5,
+    "snf": 8.0,
+    "rate": 36.5,
+    "amount": 365.0,
+    "userId": "user-id"
+  },
+  {
+    "_id": "collection-id",
+    "farmerId": "farmer-id",
+    "rateChartName": "rate-chart-name",
+    "qty": 5,
+    "fat": 3.5,
+    "snf": 7.5,
+    "rate": 32.5,
+    "amount": 162.5
+
+,
+    "userId": "user-id"
+  },
+  ...
+]
+```
+
+#### Error Response
+
+| Status Code | Response Body                                    |
+|-------------|-------------------------------------------------|
+| 401         | {"error": "Unauthorized. Bearer token required."} |
+| 500         | {"error": "An error occurred while processing the request"} |
+
+
+## Get All Dues <a name="get-all-dues"></a>
+
+Endpoint: `/api/dues`
+
+Method: `GET`
+
+Requires authentication. The request must include a valid bearer token in the `Authorization` header.
+
+### Response
+
+#### Success Response
+
+Status Code: `200`
+
+Response Body:
+```json
+[
+  {
+    "farmerId": "farmer-id",
+    "farmerName": "farmer-name",
+    "dues": 500.0
+  },
+  {
+    "farmerId": "farmer-id",
+    "farmerName": "farmer-name",
+    "dues": 250.0
+  },
+  ...
+]
+```
+
+#### Error Response
+
+| Status Code | Response Body                                    |
+|-------------|-------------------------------------------------|
+| 401         | {"error": "Unauthorized. Bearer token required."} |
+| 404         | {"message": "No farmer found"}                   |
+| 400         | {"status": "Error"}                              |
+
+## Get Dues by Farmer ID <a name="get-dues-by-farmer-id"></a>
+
+Endpoint: `/api/dues/:farmerId`
+
+Method: `GET`
+
+Requires authentication. The request must include a valid bearer token in the `Authorization` header.
+
+### Parameters
+
+| Parameter | Type   | Required | Description      |
+|-----------|--------|----------|------------------|
+| farmerId  | string | Yes      | Farmer ID        |
+
+### Response
+
+#### Success Response
+
+Status Code: `200`
 
 Response Body:
 ```json
 {
-  "error": "An error occurred while processing the request"
+  "dues": 500.0
 }
 ```
+
+#### Error Responses
+
+| Status Code | Response Body                                    |
+|-------------|-------------------------------------------------|
+| 401         | {"error": "Unauthorized. Bearer token required."} |
+| 404         | {"message": "No farmer found"}                   |
+| 400         | {"status": "Error"}                              |
+
+## Settle All Dues <a name="settle-all-dues"></a>
+
+Endpoint: `/api/dues/settle`
+
+Method: `POST`
+
+Requires authentication. The request must include a valid bearer token in the `Authorization` header.
+
+### Response
+
+#### Success Response
+
+Status Code: `200`
+
+Response Body:
+```json
+{
+  "status": "Success"
+}
+```
+
+#### Error Response
+
+| Status Code | Response Body                                    |
+|-------------|-------------------------------------------------|
+| 401         | {"error": "Unauthorized. Bearer token required."} |
+| 404         | {"message": "No farmer found"}                   |
+| 400         | {"status": "Error"}                              |
+
+Note: The `settle` endpoint will set the dues of all farmers to 0, indicating that all dues have been settled.
+
+
+## Settle Farmer's Payment <a name="settle-farmers-payment"></a>
+
+Endpoint: `/api/payment`
+
+Method: `POST`
+
+Requires authentication. The request must include a valid bearer token in the `Authorization` header.
+
+### Request Parameters
+
+| Parameter    | Type   | Required | Description                          |
+|--------------|--------|----------|--------------------------------------|
+| farmerId     | string | Yes      | Farmer ID                            |
+| date         | string | Yes      | Payment date (format: YYYY-MM-DD)    |
+| amountToPay  | number | Yes      | Amount to be paid                    |
+| remarks      | string |          | Remarks or additional information    |
+
+### Response
+
+#### Success Response
+
+Status Code: `200`
+
+Response Body:
+```json
+{
+  "status": "PAID",
+  "date": "2023-07-15",
+  "amount": 500.0,
+  "amountPaid": 300.0,
+  "remainingDues": 200.0,
+  "remarks": "Payment received",
+  "invoiceUrl": "https://example.com/invoice.pdf"
+}
+```
+
+#### Error Response
+
+| Status Code | Response Body                                    |
+|-------------|-------------------------------------------------|
+| 400         | {"status": "ERROR", "message": "Please provide all the details"} |
+| 404         | {"message": "No farmer found"}                   |
+| 400         | {"status": "ERROR", "message": "Amount to pay is greater than dues"} |
+| 400         | {"status": "Error"}                              |
+
+Note: The response will contain the payment details, including the payment status, date, amount, remaining dues, remarks, and the URL of the generated invoice in PDF format.

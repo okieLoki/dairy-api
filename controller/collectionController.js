@@ -76,7 +76,15 @@ const addCollection = async (req, res) => {
 
 
 const getAllCollections = async (req, res) => {
-
+    try {
+        const collections = await Collection.find();
+        res.status(200).json(collections);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'An error occurred while processing the request',
+        });
+    }
 }
 
 module.exports = { addCollection, getAllCollections }
