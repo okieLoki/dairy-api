@@ -92,13 +92,13 @@ const settlePayment = async (req, res) => {
 
     const data = new FormData();
     data.append('file', fs.createReadStream(pdfPath));
-    data.append('upload_preset', 'gwkugtad');
-    data.append('cloud_name', 'ds90zherj');
+    data.append('upload_preset', process.env.CLOUDINARY_UPLOAD_PRESET);
+    data.append('cloud_name', process.env.CLOUDINARY_CLOUD_NAME);
     data.append('resource_type', 'auto');
 
     let uploadUrl;
     await axios
-      .post('https://api.cloudinary.com/v1_1/ds90zherj/raw/upload', data)
+      .post(`https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/raw/upload`, data)
       .then((res) => {
         uploadUrl = res.data.secure_url;
       })
