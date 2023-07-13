@@ -40,6 +40,10 @@ const rateListSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: [true, 'User ID missing'],
         ref: 'User'
+    },
+    dues: {
+        type: Number,
+        default: 0
     }
 })
 

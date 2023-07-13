@@ -62,6 +62,9 @@ const addCollection = async (req, res) => {
             userId: user_id,
         });
 
+        farmer.dues += amount
+        await farmer.save()
+        
         res.status(201).json(collection);
     } catch (error) {
         console.log(error);
