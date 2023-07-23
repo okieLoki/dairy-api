@@ -2,6 +2,10 @@ const User = require('../model/User');
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
+// @desc    Register a new user
+// @route   POST /api/users/signup
+// @access  Admin
+
 const register = async (req, res) => {
     try {
         const { phoneNo, name, password } = req.body;
@@ -19,7 +23,7 @@ const register = async (req, res) => {
             });
         }
 
-        if(phoneNo.toString().length !== 10){
+        if (phoneNo.toString().length !== 10) {
             res.status(400).json({
                 error: 'Phone Number should be of 10 digits',
             });
@@ -50,13 +54,17 @@ const register = async (req, res) => {
     }
 }
 
+// @desc    Login a user
+// @route   POST /api/users/login
+// @access  Public
+
 const login = async (req, res) => {
 
     try {
         const { phoneNo, password } = req.body
 
         if (!phoneNo || !password) {
-            res.status(400).json({
+            return res.status(400).json({
                 status: 'Phone Number or Password missing'
             })
         }
@@ -76,9 +84,10 @@ const login = async (req, res) => {
             user.token = token
             user.password = undefined
 
-            res.status(200).json(user)
+
+            return res.status(200).json(user)
         }
-        res.status(400).json({
+        return res.status(400).json({
             status: 'Phone Number or token is incorrect'
         })
     } catch (error) {
