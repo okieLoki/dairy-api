@@ -3,19 +3,13 @@ const jwt = require('jsonwebtoken');
 const Admin = require('../model/Admin');
 
 
-const register = async (req, res) => {
+const registerUser = async (req, res) => {
     try {
         const { username, userId, password } = req.body;
         const tokenAdmin = req.header('Authorization').split(' ')[1];
         const adminId = jwt.verify(tokenAdmin, process.env.SECRET_KEY).admin_id;
 
         const admin = await Admin.findById(adminId);
-
-        if (!admin) {
-            return res.status(404).json({
-                error: 'Admin not found',
-            });
-        }
 
         if (!username || !userId || !password) {
             return res.status(400).json({
@@ -50,7 +44,7 @@ const register = async (req, res) => {
             },
             process.env.SECRET_KEY,
             {
-                expiresIn: '2h'
+                expiresIn: '30d'
             }
         )
 
@@ -66,7 +60,7 @@ const register = async (req, res) => {
 }
 
 
-const login = async (req, res) => {
+const loginUser = async (req, res) => {
 
     try {
         const { username, password } = req.body
@@ -133,4 +127,4 @@ const getAllUsers = async (req, res) => {
     }
 }
 
-module.exports = { register, login, getAllUsers }
+module.exports = { registerUser, loginUser, getAllUsers }

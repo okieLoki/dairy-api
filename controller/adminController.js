@@ -65,20 +65,32 @@ const login = async (req, res) => {
         const admin = await Admin.findOne({ email })
 
         if (admin && admin.password === password) {
+            const now = new Date();
+            const expiryDate = new Date(admin.expiryDate);
+
+            if (expiryDate < now) {
+                return res.status(400).json({
+                    error: 'Subscription expired'
+                });
+            }
+
             const token = jwt.sign(
                 {
                     admin_id: admin._id
                 },
                 process.env.SECRET_KEY,
                 {
-                    expiresIn: '2h'
+                    expiresIn: Math.floor((expiryDate - now) / 1000) // Calculate expiresIn in seconds
                 }
-            )
-            admin.token = token
-            admin.password = undefined
+            );
 
+            admin.token = token;
+            admin.password = undefined;
 
-            return res.status(200).json(admin)
+            return res.status(200).json({
+                ...admin.toObject(),
+            });
+
         }
         return res.status(400).json({
             status: 'Email or token is incorrect'
