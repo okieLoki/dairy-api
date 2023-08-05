@@ -1,99 +1,349 @@
-const RateList = require('../model/RateList')
-const jwt = require('jsonwebtoken')
+const Farmer = require("../model/Farmer");
+const RateList = require("../model/RateList");
+const User = require("../model/User");
 
 const addRateList = async (req, res) => {
     try {
-        
-        const { category, level, rateChartName, animal, stdFat, stdSNF, ratio, stdRate, minFat, maxFat, fatIncrement, minSNF, maxSNF, snfIncrement } = req.body
+        const {
+            category,
+            level,
+            rateChartName,
+            stdFatRate,
+            stdSNFRate,
+            stdTSRate,
+            incentive,
+        } = req.body;
 
-        if(!category){
-            res.status(400).json({
-                error: 'Mandatory fields are missing',
-            })
+        if (!category) {
+            return res.status(400).json({
+                error: "Mandatory fields are missing",
+            });
         }
 
-        const existingRateList = await RateList.findOne({ rateChartName })
+        const username = req.params.username;
+        const user = await User.findOne({ username });
 
-        if(existingRateList){
-            res.status(400).json({
-                error: 'Rate List Already Exists'
-            })
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found",
+            });
         }
 
-        switch(category){
-            case 'KGFAT + KGSNF':
-                if(!level || !rateChartName || !animal || !ratio || !stdFat || !stdSNF || !stdRate){
-                    res.status(400).json({
-                        error: 'Mandatory fields are missing',
+        const existingRateList = await RateList.findOne({ rateChartName });
+
+        if (existingRateList) {
+            return res.status(400).json({
+                error: "Rate List Already Exists",
+            });
+        }
+
+        switch (category) {
+            case "KGFAT + KGSNF":
+                if (
+                    !level ||
+                    !rateChartName ||
+                    !stdFatRate ||
+                    !stdSNFRate ||
+                    !stdTSRate ||
+                    !incentive
+                ) {
+                    return res.status(400).json({
+                        error: "Mandatory fields are missing",
                     });
                 }
-                break
-            case 'KG FAT ONLY': 
-                if(!level || !rateChartName || !animal || !stdRate){
-                    res.status(400).json({
-                        error: 'Mandatory fields are missing',
+                break;
+            case "KG FAT ONLY":
+                if (!level || !rateChartName || !stdFatRate || !incentive) {
+                    return res.status(400).json({
+                        error: "Mandatory fields are missing",
                     });
                 }
-                break
-            case 'FAT ONLY':
-                if(!level || !rateChartName || !animal || !minFat || !maxFat || !fatIncrement){
-                    res.status(400).json({
-                        error: 'Mandatory fields are missing',
-                    });
-                    if(minFat > maxFat){
-                        res.status(400).json({
-                            error: 'Minimum FAT should be less than Maximum FAT'
-                        })
-                    }
-                }
-                break
-            case 'FAT + SNF':
-                if(!level || !rateChartName || !animal || !minFat || !maxFat || !fatIncrement || !minSNF || !maxSNF || !snfIncrement){
-                    res.status(400).json({
-                        error: 'Mandatory fields are missing',
-                    });
-                }
-                if(minFat > maxFat || minSNF > maxSNF){
-                    res.status(400).json({
-                        error: 'Minimum FAT/SNF should be less than Maximum FAT/SNF'
-                    })
-                }
-                break
-            default: 
+                break;
+            default:
                 res.status(400).json({
-                    error: 'Invalid Category',
-                })
+                    error: "Invalid Category",
+                });
         }
 
-        const token = req.headers.authorization.split(' ')[1]
-        const user_id = jwt.decode(token).user_id
+        const rateList = await RateList.create({ ...req.body, userId: user._id });
 
-        const rateList = await RateList.create({ ...req.body, userId: user_id })
-
-        res.status(201).json(rateList)
+        res.status(201).json(rateList);
     } catch (error) {
         console.log(error);
         res.status(500).json({
-            error: 'An error occurred while processing the request',
+            error: "An error occurred while processing the request",
         });
     }
-}
+};
+
+const addRateListByUser = async (req, res) => {
+    try {
+        const {
+            category,
+            level,
+            rateChartName,
+            stdFatRate,
+            stdSNFRate,
+            stdTSRate,
+            incentive,
+        } = req.body;
+
+        if (!category) {
+            return res.status(400).json({
+                error: "Mandatory fields are missing",
+            });
+        }
+
+        const username = req.params.username;
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found",
+            });
+        }
+
+        // Check if the user has permission to add rate lists
+        if (user.permissions === "Not Allow") {
+            return res.status(403).json({
+                error: "Permission denied. User is not allowed to add rate lists.",
+            });
+        }
+
+        const existingRateList = await RateList.findOne({ rateChartName });
+
+        if (existingRateList) {
+            return res.status(400).json({
+                error: "Rate List Already Exists",
+            });
+        }
+
+        switch (category) {
+            case "KGFAT + KGSNF":
+                if (
+                    !level ||
+                    !rateChartName ||
+                    !stdFatRate ||
+                    !stdSNFRate ||
+                    !stdTSRate ||
+                    !incentive
+                ) {
+                    return res.status(400).json({
+                        error: "Mandatory fields are missing",
+                    });
+                }
+                break;
+            case "KG FAT ONLY":
+                if (!level || !rateChartName || !stdFatRate || !incentive) {
+                    return res.status(400).json({
+                        error: "Mandatory fields are missing",
+                    });
+                }
+                break;
+            default:
+                res.status(400).json({
+                    error: "Invalid Category",
+                });
+        }
+
+        const rateList = await RateList.create({ ...req.body, userId: user._id });
+
+        res.status(201).json(rateList);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: "An error occurred while processing the request",
+        });
+    }
+};
 
 
 const getAllRateList = async (req, res) => {
     try {
-        const token = req.headers.authorization.split(' ')[1]
-        const user_id = jwt.decode(token).user_id
+        const username = req.params.username;
+        const user = await User.findOne({ username });
 
-        const rateList = await RateList.find({ userId: user_id })
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found",
+            });
+        }
 
-        res.status(200).json(rateList)
+        const rateLists = await RateList.find({ userId: user._id });
+        res.status(200).json(rateLists);
     } catch (error) {
         console.log(error);
         res.status(500).json({
-            error: 'An error occurred while processing the request',
+            error: "An error occurred while processing the request",
+        });
+    }
+};
+
+const getRateListById = async (req, res) => {
+    try {
+        const { id } = req.params
+        const rateList = await RateList.findById(id)
+
+        if (!rateList) {
+            return res.status(404).json({
+                message: 'Rate chart not found'
+            })
+        }
+
+        return res.status(200).json(rateList)
+    }
+    catch (err) {
+        console.log(err)
+        return res.status(500).json({
+            error: "An error occurred while processing the request",
+        })
+    }
+}
+
+const updateRateListById = async (req, res) => {
+    try {
+        const { id } = req.params
+        const rateList = await RateList.findById(id)
+        const {
+            category,
+            level,
+            rateChartName,
+            stdFatRate,
+            stdSNFRate,
+            stdTSRate,
+            incentive,
+        } = req.body;
+
+
+        if (!rate) {
+            return res.status(404).json({
+                message: 'Rate chart not found'
+            })
+        }
+
+
+        rateList.category = category || rateList.category
+        rateList.level = level || rateList.level
+        rateList.rateChartName = rateChartName || rateChart.rateChartName
+        rateList.stdFatRate = stdFatRate || rateList.stdFatRate
+        rateList.stdSNFRate = stdSNFRate || rateList.stdSNFRate
+        rateList.stdTSRate = stdTSRate || rateList.stdTSRate
+        rateList.incentive = incentive || rateList.incentive
+
+        await rateList.save()
+
+        return res.status(200).json(rateList)
+    }
+    catch (err) {
+        console.log(error);
+        res.status(500).json({
+            error: "An error occurred while processing the request",
         });
     }
 }
 
-module.exports= { addRateList, getAllRateList }
+const deleteRateList = async (req, res) => {
+    try {
+        const rateListId = req.params.id;
+        const username = req.params.username;
+
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found",
+            });
+        }
+
+        const rateList = await RateList.findById(rateListId);
+
+        if (!rateList) {
+            return res.status(404).json({
+                error: "Rate List not found",
+            });
+        }
+
+        // Check if the rate list belongs to the user before deletion
+        if (rateList.userId.toString() !== user._id.toString()) {
+            return res.status(403).json({
+                error: "Permission denied. You are not the owner of this rate list.",
+            });
+        }
+
+        await RateList.findByIdAndDelete(rateListId);
+
+        res.status(200).json({
+            message: "Rate List deleted successfully",
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: "An error occurred while processing the request",
+        });
+    }
+};
+
+
+
+const getRate = async (req, res) => {
+    try {
+        const { fat, snf } = req.query;
+        const { farmerId } = req.params;
+        const username = req.params.username;
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(404).json({
+                status: "User not found",
+            });
+        }
+
+        const farmer = await Farmer.findOne({ userId: user._id, farmerId });
+
+        if (!farmer) {
+            return res.status(400).json({
+                status: "Invalid Farmer ID or The Farmer does not belong to the User",
+            });
+        }
+
+        let rate = 0;
+
+        if (farmer.farmerLevel === 5) {
+            rate = farmer.fixedRate;
+        } else {
+            const rateChart = await RateList.findOne({
+                level: farmer.farmerLevel,
+                userId: user._id,
+            });
+
+            const { incentive, stdFatRate, stdSNFRate, stdTSRate } = rateChart;
+
+            switch (rateChart.category) {
+                case "KGFAT + KGSNF":
+                    rate =
+                        (stdFatRate * fat) +
+                        (stdSNFRate * snf) +
+                        (Number(fat) + Number(snf)) * stdTSRate +
+                        incentive;
+                    break;
+
+                case "KG FAT ONLY":
+                    rate = (stdFatRate * fat) + incentive;
+                    break;
+
+                default:
+                    return res.status(400).json({
+                        error: "Invalid Category",
+                    });
+            }
+        }
+
+        return res.json({ rate });
+    } catch (error) {
+        return res.status(400).json({
+            status: "No rate chart found for this farmer",
+        });
+    }
+};
+
+module.exports = { addRateList, addRateListByUser, getAllRateList, getRateListById, updateRateListById, deleteRateList, getRate };

@@ -1,10 +1,14 @@
 const mongoose = require('mongoose')
 
-const collectionSchema = mongoose.Schema({
+const collectionSchema = new mongoose.Schema({
     farmerId: {
         type: String,
         required: [true, 'Farmer ID missing'],
         ref: 'Farmer'
+    },
+    farmerName: {
+        type: String,
+        required: [true, 'Farmer Name missing'],
     },
     collectionDate: {
         type: Date,
@@ -30,6 +34,10 @@ const collectionSchema = mongoose.Schema({
     amount: {
         type: Number,
         required: [true, 'Amount missing']
+    },
+    shift: {
+        type: String,
+        enum: ['Morning', 'Evening']
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,

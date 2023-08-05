@@ -1,85 +1,208 @@
 const Farmer = require('../model/Farmer')
-const jwt = require('jsonwebtoken')
+const User = require('../model/User')
 
-// @desc    Add a new farmer
-// @route   POST /api/farmer
-// @access  Private
-const addFarmer = async (req, res) => {
+const addFarmerAsAdmin = async (req, res) => {
     try {
-
-        const { farmerId, rfid, mobileNumber, farmerName, farmerLevel, paymentMode, bankName, accountNumber, bankHolderName } = req.body
+        const { farmerId, mobileNumber, farmerName, farmerLevel, paymentMode, bankName, accountNumber, bankHolderName, fixedRate } = req.body;
 
         if (!farmerId || !mobileNumber || !farmerName || !farmerLevel || !paymentMode) {
             return res.status(400).json({
-                success: false,
-                message: 'Missing required fields'
-            })
+                message: 'Missing required fields',
+            });
         }
 
-        const existingFarmer = await Farmer.findOne({ farmerId })
+        const username = req.params.username;
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User does not exist',
+            });
+        }
+
+        const existingFarmer = await Farmer.findOne({ farmerId, userId: user._id });
 
         if (existingFarmer) {
-            return res.status(400).json({
-                status: 'Farmer Already Exists'
-            })
+            return res.status(409).json({
+                message: 'Farmer Already Exists',
+            });
         }
 
-        const token = req.headers.authorization.split(' ')[1]
-        const user_id = jwt.decode(token).user_id
+        const farmer = await Farmer.create({ ...req.body, userId: user._id });
 
-        const farmer = await Farmer.create({ ...req.body, userId: user_id })
-
-        return res.status(201).json(farmer)
-
+        return res.status(201).json({
+            message: 'Farmer added successfully',
+            data: farmer,
+        });
     } catch (error) {
         console.log(error);
 
         res.status(500).json({
-            error: 'An error occurred while processing the request',
+            message: 'An error occurred while processing the request',
+        });
+    }
+};
+
+const addFarmerAsUser = async (req, res) => {
+    try {
+        const { farmerId, mobileNumber, farmerName, farmerLevel, paymentMode, bankName, accountNumber, bankHolderName, fixedRate } = req.body;
+
+        if (!farmerId || !mobileNumber || !farmerName || !farmerLevel || !paymentMode) {
+            return res.status(400).json({
+                message: 'Missing required fields',
+            });
+        }
+
+        const username = req.params.username;
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User does not exist',
+            });
+        }
+
+        if (user.permissions.AddFarmer === 'Not Allow') {
+            return res.status(403).json({
+                message: 'User does not have permission to add farmer',
+            });
+        }
+
+        const existingFarmer = await Farmer.findOne({ farmerId, userId: user._id });
+
+        if (existingFarmer) {
+            return res.status(409).json({
+                message: 'Farmer Already Exists',
+            });
+        }
+
+        const farmer = await Farmer.create({ ...req.body, userId: user._id });
+
+        return res.status(201).json({
+            message: 'Farmer added successfully',
+            data: farmer,
+        });
+    } catch (error) {
+        console.log(error);
+
+        return res.status(500).json({
+            message: 'An error occurred while processing the request',
+        });
+    }
+};
+
+const getFarmerById = async (req, res) => {
+    try {
+        const { farmerId, username } = req.params
+        const user = await User.findOne({ username })
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User does not exist'
+            })
+        }
+
+        const farmer = await Farmer.findOne({ farmerId, userId: user._id })
+
+        if (!farmer) {
+            return res.status(404).json({
+                message: 'No farmer found'
+            })
+        }
+
+        return res.status(200).json(farmer)
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            message: 'An error occurred while processing the request'
         })
     }
 }
 
-// @desc    Delete a new farmer
-// @route   DELETE /api/farmer
-// @access  Private
-const deleteFarmer = async (req, res) => {
+const updateFarmerById = async (req, res) => {
     try {
-        const token = req.headers.authorization.split(' ')[1]
-        const user_id = jwt.decode(token).user_id
+        const { id } = req.params
+        const { farmerId, mobileNumber, farmerName, farmerLevel, paymentMode, bankName, accountNumber, bankHolderName, fixedRate } = req.body;
 
-        const farmer = await Farmer.deleteOne({ userId: user_id, farmerId: req.params.id })
+        const farmer = await Farmer.findById(id)
 
         if (!farmer) {
-            return res.status(400).json({
-                status: 'Farmer does not exist'
+            return res.status(404).json({
+                message: 'Farmer not found'
             })
         }
 
-        res.status(200).json({
-            status: 'Farmer deleted successfully'
+        farmer.farmerId = farmerId || farmer.farmerId
+        farmer.mobileNumber = mobileNumber || farmer.mobileNumber
+        farmer.farmerName = farmerName || farmer.farmerName
+        farmer.farmerLevel = farmerLevel || farmer.farmerLevel
+        farmer.paymentMode = paymentMode || farmer.paymentMode
+        farmer.bankName = bankName || farmer.bankName
+        farmer.accountNumber = accountNumber || farmer.accountNumber
+        farmer.bankHolderName = bankHolderName || farmer.bankHolderName
+        farmer.fixedRate = fixedRate || farmer.fixedRate
+
+        await farmer.save()
+        return res.status(200).json(farmer)
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({
+            message: 'An error occurred while processing the request',
+        })
+    }
+}
+
+const deleteFarmer = async (req, res) => {
+    try {
+        const { username, id } = req.params
+
+        const user = await User.findOne({ username })
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User does not exist',
+            })
+        }
+
+        const farmer = await Farmer.findById(id)
+
+        if (!farmer) {
+            return res.status(404).json({
+                message: 'Farmer does not exist',
+            })
+        }
+
+        await Farmer.findByIdAndDelete(id)
+
+        return res.status(200).json({
+            message: 'Farmer deleted successfully',
         })
     }
     catch (error) {
         console.log(error);
 
         res.status(500).json({
-            error: 'An error occurred while processing the request',
+            message: 'An error occurred while processing the request',
         })
     }
 }
 
-// @desc    Get all farmers
-// @route   GET /api/farmer
-// @access  Private
 const getAllFarmers = async (req, res) => {
     try {
-        const token = req.headers.authorization.split(' ')[1]
-        const user_id = jwt.decode(token).user_id
+        const username = req.params.username
+        const user = await User.findOne({ username })
 
-        const farmer = await Farmer.find({ userId: user_id })
+        if (!user) {
+            return res.status(400).json({
+                status: 'User does not exist'
+            })
+        }
 
-        res.status(200).json(farmer)
+        const farmers = await Farmer.find({ userId: user._id })
+
+        res.status(200).json(farmers)
     } catch (error) {
         console.log(error);
         res.status(500).json({
@@ -88,4 +211,28 @@ const getAllFarmers = async (req, res) => {
     }
 }
 
-module.exports = { addFarmer, deleteFarmer, getAllFarmers }
+
+const getLatestFarmerId = async (req, res) => {
+    try {
+        const username = req.params.username
+        const user = await User.findOne({ username })
+        if (!user) {
+            return res.status(400).json({
+                status: 'User does not exist'
+            })
+        }
+
+        const recentFarmer = await Farmer.find({ userId: user._id }).sort({ farmerId: -1 }).limit(1)
+
+        res.status(200).json(recentFarmer.length === 0 ? 0 : recentFarmer[0].farmerId)
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'An error occurred while processing the request',
+        });
+    }
+}
+
+
+module.exports = { addFarmerAsAdmin, addFarmerAsUser, deleteFarmer, getAllFarmers, getFarmerById, updateFarmerById, getLatestFarmerId }

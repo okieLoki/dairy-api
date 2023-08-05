@@ -1,50 +1,34 @@
-const jwt = require('jsonwebtoken')
-const Farmer = require('../model/Farmer')
+const Farmer = require('../model/Farmer');
+const User = require('../model/User');
 
-const getDuesFarmerId = async (req, res) => {
+const getAllDuesByUser = async (req, res) => {
     try {
-        const farmerId  = req.params.farmerId
-        const token = req.headers.authorization.split(' ')[1];
-        const user_id = jwt.decode(token).user_id;
+        const username = req.params.username
 
-        const farmer = await Farmer.findOne({ userId: user_id, farmerId: farmerId })
+        const user = await User.findOne({ username })
 
-        if (!farmer) {
-            return res.status(404).send({ message: 'No farmer found' })
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' })
         }
 
-        res.status(200).json({
-            dues: farmer.dues
-        })
-    }
-    catch (error) {
-        console.log(error)
+        if (user.permissions.allowDues === 'Not Allow') {
+            return res.status(403).send({ message: 'Dues not allowed' })
+        }
 
-        res.status(400).json({
-            status: 'Error'
-        })
-    }
-}
+        const farmers = await Farmer.find({ userId: user._id }).catch((error) => {
+            console.log(error);
+            return res.status(500).json({ message: 'An error occurred while fetching farmers' });
+        });
 
-const getAllDues = async (req, res) => {
-
-    try {
-        const token = req.headers.authorization.split(' ')[1];
-        const user_id = jwt.decode(token).user_id;
-
-        const farmers = await Farmer.find({ userId: user_id })
-
-        if (!farmers) {
+        if (farmers.length === 0) {
             return res.status(404).send({ message: 'No farmer found' })
         }
 
         const farmerDues = farmers.map((farmer) => {
-            if (farmer.dues > 0) {
-                return {
-                    farmerId: farmer.farmerId,
-                    farmerName: farmer.farmerName,
-                    dues: farmer.dues
-                }
+            return {
+                farmerId: farmer.farmerId,
+                farmerName: farmer.farmerName,
+                dues: farmer.credit - farmer.debit
             }
         })
 
@@ -59,34 +43,42 @@ const getAllDues = async (req, res) => {
     }
 }
 
-const settleAllDues = async (req, res) => {
-    
-        try {
-            const token = req.headers.authorization.split(' ')[1];
-            const user_id = jwt.decode(token).user_id;
-    
-            const farmers = await Farmer.find({ userId: user_id })
-    
-            if (!farmers) {
-                return res.status(404).send({ message: 'No farmer found' })
-            }
-    
-            farmers.forEach(async (farmer) => {
-                farmer.dues = 0
-                await farmer.save()
-            })
-    
-            res.status(200).json({
-                status: 'Success'
-            })
-    
-        } catch (error) {
-            console.log(error)
-    
-            res.status(400).json({
-                status: 'Error'
-            })
+const getAllDuesByAdmin = async (req, res) => {
+    try {
+        const username = req.params.username
+
+        const user = await User.findOne({ username })
+
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' })
         }
+
+        const farmers = await Farmer.find({ userId: user._id }).catch((error) => {
+            console.log(error);
+            return res.status(500).json({ message: 'An error occurred while fetching farmers' });
+        });
+
+        if (farmers.length === 0) {
+            return res.status(404).send({ message: 'No farmer found' })
+        }
+
+        const farmerDues = farmers.map((farmer) => {
+            return {
+                farmerId: farmer.farmerId,
+                farmerName: farmer.farmerName,
+                dues: farmer.credit - farmer.debit
+            }
+        })
+
+        res.status(200).json(farmerDues)
+
+    } catch (error) {
+        console.log(error)
+
+        res.status(400).json({
+            status: 'Error'
+        })
+    }
 }
 
-module.exports = {getAllDues, settleAllDues, getDuesFarmerId}
+module.exports = { getAllDuesByUser, getAllDuesByAdmin }

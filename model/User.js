@@ -1,27 +1,48 @@
 const mongoose = require('mongoose')
 
 const userSchema = new mongoose.Schema({
-    phoneNo: {
+    userId: {
         type: Number,
         unique: true,
-        required: [true, 'Phone Number missing'],
-        minlength: 10,
+        required: [true, 'User ID missing'],
     },
-    name: {
+    username: {
         type: String,
-        required: [true, 'First Name missing']
+        required: [true, 'User name missing']
     },
     password: {
         type: String,
-        required: [true, 'Password missing']
+        required: [true, 'Password missing'],
+        minLength: 8,
+    },
+    mobileNo: {
+        type: Number,
+    },
+    contactPerson: {
+        type: String,
+    },
+    address: {
+        type: String,
+    },
+    permissions: {
+        allowAddFarmer: { type: String, default: 'Not Allow', enum: ['Allow', 'Not Allow'] },
+        allowLedger: { type: String, default: 'Not Allow', enum: ['Allow', 'Not Allow'] },
+        allowPayment: { type: String, default: 'Not Allow', enum: ['Allow', 'Not Allow'] },
+        allowRateChart: { type: String, default: 'Not Allow', enum: ['Allow', 'Not Allow'] },
+        allowDues: { type: String, default: 'Not Allow', enum: ['Allow', 'Not Allow'] },
+    },
+    adminId: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: [true, 'Admin ID missing'],
+        ref: 'Admin'
+    },
+    timezone: {
+        type: String,
+        default: 'Asia/Kathmandu',
     },
     token: {
         type: String
     },
-    isAdmin: {
-        type: Boolean,
-        default: false
-    }
 })
 
 const User = mongoose.model('User', userSchema)

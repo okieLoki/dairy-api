@@ -1,13 +1,9 @@
 const mongoose = require('mongoose')
 
-const rateListSchema = new mongoose.Schema({
+const farmerSchema = new mongoose.Schema({
     farmerId: {
         type: Number,
         required: [true, 'Farmer ID missing'],
-        unique: true
-    },
-    rfid: {
-        type: String,
     },
     mobileNumber: {
         type: Number,
@@ -17,10 +13,16 @@ const rateListSchema = new mongoose.Schema({
         type: String,
         required: [true, 'Name missing'],
     },
-    farmerLevel : {
+    farmerLevel: {
         type: Number,
         required: [true, 'Level missing'],
-        enum: [1, 2, 3, 4]
+        enum: [1, 2, 3, 4, 5]
+    },
+    fixedRate: {
+        type: Number,
+        required: function () {
+            return this.farmerLevel === 5
+        }
     },
     paymentMode: {
         type: String,
@@ -41,12 +43,18 @@ const rateListSchema = new mongoose.Schema({
         required: [true, 'User ID missing'],
         ref: 'User'
     },
-    dues: {
+    debit: {
+        type: Number,
+        default: 0
+    },
+    credit: {
         type: Number,
         default: 0
     }
 })
 
-const Farmer = mongoose.model('Farmer', rateListSchema)
+farmerSchema.index({ farmerId: 1, userId: 1 }, { unique: true });
+
+const Farmer = mongoose.model('Farmer', farmerSchema)
 
 module.exports = Farmer

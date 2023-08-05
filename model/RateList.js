@@ -4,7 +4,7 @@ const rateListSchema = new mongoose.Schema({
   category: {
     type: String,
     required: [true, 'Category missing'],
-    enum: ['KGFAT + KGSNF', 'KG FAT ONLY', 'FAT ONLY', 'FAT + SNF']
+    enum: ['KGFAT + KGSNF', 'KG FAT ONLY']
   },
   level: {
     type: Number,
@@ -15,71 +15,27 @@ const rateListSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Rate Chart Name missing']
   },
-  animal: {
-    type: String,
-    required: [true, 'Animal missing'],
-    enum: ['COW', 'BUFFALO', 'BOTH']
-  },
-  stdFat: {
+  stdFatRate: {
     type: Number,
-    required: function() {
-        return this.category === 'KGFAT + KGSNF' || this.category === 'FAT ONLY';
+    required: function () {
+      return this.category === 'KGFAT + KGSNF' || this.category === 'KG FAT ONLY';
     }
   },
-  stdSNF: {
+  stdSNFRate: {
     type: Number,
-    required: function() {
-      return this.category === 'KGFAT + KGSNF' || this.category === 'FAT + SNF';
-    }
-  },
-  ratio: {
-    type: String,
-    required: function() {
-        return this.category === 'KGFAT + KGSNF';
-    },
-    enum: ['60:40', '52:48', '50:50']
-  },
-  stdRate: {
-    type: Number,
-    required: function() {
+    required: function () {
       return this.category === 'KGFAT + KGSNF';
     }
   },
-  minFat: {
+  stdTSRate: {
     type: Number,
-    required: function() {
-      return this.category === 'FAT ONLY' || this.category === 'FAT + SNF';
+    required: function () {
+      return this.category === 'KGFAT + KGSNF';
     }
   },
-  maxFat: {
+  incentive: {
     type: Number,
-    required: function() {
-      return this.category === 'FAT ONLY' || this.category === 'FAT + SNF';
-    }
-  },
-  fatIncrement: {
-    type: Number,
-    required: function() {
-      return this.category === 'FAT ONLY' || this.category === 'FAT + SNF';
-    }
-  },
-  minSNF: {
-    type: Number,
-    required: function() {
-      return this.category === 'FAT + SNF';
-    }
-  },
-  maxSNF: {
-    type: Number,
-    required: function() {
-      return this.category === 'FAT + SNF';
-    }
-  },
-  snfIncrement: {
-    type: Number,
-    required: function() {
-      return this.category === 'FAT + SNF';
-    }
+    required: [true, 'Incentive missing']
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
