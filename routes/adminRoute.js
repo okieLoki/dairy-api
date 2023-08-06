@@ -4,7 +4,7 @@ const router = express.Router();
 const { register, login } = require('../controller/adminController');
 const { getAllLedgerEntriesForRangeByAdmin } = require('../controller/ledgerController');
 const { addRateList, getAllRateList, getRate, deleteRateList, updateRateListById, getRateListById } = require('../controller/ratelistController');
-const { deleteFarmer, addFarmerAsAdmin, getAllFarmers, getLatestFarmerId, updateFarmerById, getFarmerById } = require('../controller/farmerController');
+const { deleteFarmer, addFarmerAsAdmin, getAllFarmers, updateFarmerById, getFarmerById, getLatestFarmerIdByAdmin } = require('../controller/farmerController');
 const { settlePaymentByAdmin } = require('../controller/paymentController');
 const { getAllDuesByAdmin } = require('../controller/duesController');
 const { authAdmin } = require('../middleware/auth');
@@ -19,9 +19,9 @@ router.post('/login', login)
 router.post('/:username/farmer/', authAdmin, addFarmerAsAdmin)
 router.delete('/:username/farmer/:id', authAdmin, deleteFarmer)
 router.put('/:username/farmer/:id', authAdmin, updateFarmerById)
+router.get('/:username/farmer/latestid', authAdmin, getLatestFarmerIdByAdmin)
 router.get('/:username/farmer/:farmerId', authAdmin, getFarmerById)
 router.get('/:username/farmer/', authAdmin, getAllFarmers)
-router.get('/:username/farmer/latestid/', authAdmin, getLatestFarmerId)
 
 // RATELIST ROUTING
 router.post('/:username/ratelist', authAdmin, addRateList)

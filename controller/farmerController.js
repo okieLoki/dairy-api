@@ -211,8 +211,7 @@ const getAllFarmers = async (req, res) => {
     }
 }
 
-
-const getLatestFarmerId = async (req, res) => {
+const getLatestFarmerIdByAdmin = async (req, res) => {
     try {
         const username = req.params.username
         const user = await User.findOne({ username })
@@ -220,6 +219,37 @@ const getLatestFarmerId = async (req, res) => {
             return res.status(400).json({
                 status: 'User does not exist'
             })
+        }
+
+
+        const recentFarmer = await Farmer.find({ userId: user._id }).sort({ farmerId: -1 }).limit(1)
+
+        res.status(200).json(recentFarmer.length === 0 ? 0 : recentFarmer[0].farmerId)
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'An error occurred while processing the request',
+        });
+    }
+}
+
+
+const getLatestFarmerIdByUser = async (req, res) => {
+    try {
+        const username = req.params.username
+        console.log(username)
+        const user = await User.findOne({ username })
+        if (!user) {
+            return res.status(400).json({
+                status: 'User does not exist'
+            })
+        }
+
+        if (user.permissions.AddFarmer === 'Not Allow') {
+            return res.status(403).json({
+                message: 'User does not have permission to add farmer',
+            });
         }
 
         const recentFarmer = await Farmer.find({ userId: user._id }).sort({ farmerId: -1 }).limit(1)
@@ -235,4 +265,4 @@ const getLatestFarmerId = async (req, res) => {
 }
 
 
-module.exports = { addFarmerAsAdmin, addFarmerAsUser, deleteFarmer, getAllFarmers, getFarmerById, updateFarmerById, getLatestFarmerId }
+module.exports = { addFarmerAsAdmin, addFarmerAsUser, deleteFarmer, getAllFarmers, getFarmerById, updateFarmerById, getLatestFarmerIdByAdmin, getLatestFarmerIdByUser }
