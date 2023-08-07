@@ -1,6 +1,7 @@
 const Admin = require('../model/Admin');
 const jwt = require('jsonwebtoken')
-const validator = require('email-validator')
+const validator = require('email-validator');
+const Bill = require('../model/Bill');
 
 const register = async (req, res) => {
     try {

@@ -38,7 +38,8 @@ const getAllLedgerEntriesForRangeByAdmin = async (req, res) => {
                     },
                 },
             ],
-        });
+        }).sort({ date: 1 });
+
         res.status(200).json(ledgerEntries);
     } catch (error) {
         console.log(error);
@@ -47,6 +48,7 @@ const getAllLedgerEntriesForRangeByAdmin = async (req, res) => {
         });
     }
 };
+
 
 
 
@@ -91,7 +93,7 @@ const getAllLedgerEntriesForRange = async (req, res) => {
                     },
                 },
             ],
-        });
+        }).sort({ date: 1 });
         res.status(200).json(ledgerEntries);
     } catch (error) {
         console.log(error);

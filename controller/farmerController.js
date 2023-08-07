@@ -1,5 +1,7 @@
+const Admin = require('../model/Admin');
 const Farmer = require('../model/Farmer')
 const User = require('../model/User')
+const jwt = require('jsonwebtoken')
 
 const addFarmerAsAdmin = async (req, res) => {
     try {
@@ -17,6 +19,17 @@ const addFarmerAsAdmin = async (req, res) => {
         if (!user) {
             return res.status(404).json({
                 message: 'User does not exist',
+            });
+        }
+
+        const token = req.headers.authorization.split(' ')[1];
+        const admin_id = jwt.verify(token, process.env.JWT_SECRET).admin_id
+        const admin = await Admin.findById(admin_id)
+        const farmers = await Farmer.find({ userId: user._id })
+
+        if (admin.maxFarmers === farmers.length) {
+            return res.status(403).json({
+                message: 'Maximum farmer limit reached',
             });
         }
 
@@ -65,6 +78,14 @@ const addFarmerAsUser = async (req, res) => {
         if (user.permissions.AddFarmer === 'Not Allow') {
             return res.status(403).json({
                 message: 'User does not have permission to add farmer',
+            });
+        }
+
+        const admin = await Admin.findById(user.adminId)
+        const farmers = await Farmer.find({ userId: user._id })
+        if (admin.maxFarmers === farmers.length) {
+            return res.status(403).json({
+                message: 'Maximum farmer limit reached',
             });
         }
 
@@ -122,10 +143,18 @@ const getFarmerById = async (req, res) => {
 
 const updateFarmerById = async (req, res) => {
     try {
-        const { id } = req.params
+        const { username, farmerIdParam } = req.params
         const { farmerId, mobileNumber, farmerName, farmerLevel, paymentMode, bankName, accountNumber, bankHolderName, fixedRate } = req.body;
 
-        const farmer = await Farmer.findById(id)
+        const user = User.find({ username })
+
+        if (!user) {
+            return res.status(404).json({
+                message: 'User not found'
+            })
+        }
+
+        const farmer = await Farmer.findOne({ farmerId: farmerIdParam, userId: user._id })
 
         if (!farmer) {
             return res.status(404).json({
@@ -156,7 +185,7 @@ const updateFarmerById = async (req, res) => {
 
 const deleteFarmer = async (req, res) => {
     try {
-        const { username, id } = req.params
+        const { username, farmerId } = req.params
 
         const user = await User.findOne({ username })
 
@@ -166,7 +195,7 @@ const deleteFarmer = async (req, res) => {
             })
         }
 
-        const farmer = await Farmer.findById(id)
+        const farmer = await Farmer.find({ farmerId, userId: user._id })
 
         if (!farmer) {
             return res.status(404).json({

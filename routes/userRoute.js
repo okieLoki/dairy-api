@@ -13,8 +13,8 @@ const { addCollectionByUser, getAllCollectionsForDate, getTotalMilkByUser, getAv
 
 // AUTHENTICATION 
 router.post('/login', loginUser)
-router.get('/', authAdmin, getAllUsers)
 router.post('/signup', authAdmin, registerUser);
+router.get('/', authAdmin, getAllUsers)
 
 // FARMERS ROUTING
 router.get('/:username/farmer/latestid/', authUser, getLatestFarmerIdByUser)

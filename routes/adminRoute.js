@@ -17,8 +17,8 @@ router.post('/login', login)
 
 // FARMERS ROUTING
 router.post('/:username/farmer/', authAdmin, addFarmerAsAdmin)
-router.delete('/:username/farmer/:id', authAdmin, deleteFarmer)
-router.put('/:username/farmer/:id', authAdmin, updateFarmerById)
+router.delete('/:username/farmer/:farmerId', authAdmin, deleteFarmer)
+router.put('/:username/farmer/:farmerId', authAdmin, updateFarmerById)
 router.get('/:username/farmer/latestid', authAdmin, getLatestFarmerIdByAdmin)
 router.get('/:username/farmer/:farmerId', authAdmin, getFarmerById)
 router.get('/:username/farmer/', authAdmin, getAllFarmers)
