@@ -215,7 +215,7 @@ const updateRateListById = async (req, res) => {
         } = req.body;
 
 
-        if (!rate) {
+        if (!rateList) {
             return res.status(404).json({
                 message: 'Rate chart not found'
             })
@@ -224,7 +224,7 @@ const updateRateListById = async (req, res) => {
 
         rateList.category = category || rateList.category
         rateList.level = level || rateList.level
-        rateList.rateChartName = rateChartName || rateChart.rateChartName
+        rateList.rateChartName = rateChartName || rateList.rateChartName
         rateList.stdFatRate = stdFatRate || rateList.stdFatRate
         rateList.stdSNFRate = stdSNFRate || rateList.stdSNFRate
         rateList.stdTSRate = stdTSRate || rateList.stdTSRate
@@ -235,7 +235,7 @@ const updateRateListById = async (req, res) => {
         return res.status(200).json(rateList)
     }
     catch (err) {
-        console.log(error);
+        console.log(err);
         res.status(500).json({
             error: "An error occurred while processing the request",
         });
