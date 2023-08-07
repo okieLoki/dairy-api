@@ -143,10 +143,10 @@ const getFarmerById = async (req, res) => {
 
 const updateFarmerById = async (req, res) => {
     try {
-        const { username, farmerIdParam } = req.params
+        const { username } = req.params
         const { farmerId, mobileNumber, farmerName, farmerLevel, paymentMode, bankName, accountNumber, bankHolderName, fixedRate } = req.body;
 
-        const user = User.find({ username })
+        const user = await User.findOne({ username })
 
         if (!user) {
             return res.status(404).json({
@@ -154,7 +154,7 @@ const updateFarmerById = async (req, res) => {
             })
         }
 
-        const farmer = await Farmer.findOne({ farmerId: farmerIdParam, userId: user._id })
+        const farmer = await Farmer.findOne({ farmerId: req.params.farmerId, userId: user._id })
 
         if (!farmer) {
             return res.status(404).json({
@@ -195,15 +195,7 @@ const deleteFarmer = async (req, res) => {
             })
         }
 
-        const farmer = await Farmer.find({ farmerId, userId: user._id })
-
-        if (!farmer) {
-            return res.status(404).json({
-                message: 'Farmer does not exist',
-            })
-        }
-
-        await Farmer.findByIdAndDelete(id)
+        const farmer = await Farmer.findOneAndDelete({ farmerId, userId: user._id })
 
         return res.status(200).json({
             message: 'Farmer deleted successfully',
