@@ -23,7 +23,7 @@ const addFarmerAsAdmin = async (req, res) => {
         }
 
         const token = req.headers.authorization.split(' ')[1];
-        const admin_id = jwt.verify(token, process.env.JWT_SECRET).admin_id
+        const admin_id = jwt.verify(token, process.env.SECRET_KEY).admin_id
         const admin = await Admin.findById(admin_id)
         const farmers = await Farmer.find({ userId: user._id })
 
