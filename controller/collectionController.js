@@ -77,7 +77,7 @@ const addCollectionByAdmin = async (req, res) => {
         const { username } = req.params;
         const { farmerId, collectionDate, qty, fat, snf, rate, amount } = req.body;
 
-        if (!username || !farmerId || !collectionDate || !qty || !fat || !snf || !rate || !amount) {
+        if (!username || !farmerId || !collectionDate || !qty || !rate || !amount) {
             return res.status(400).json({
                 message: 'Please provide all the details',
             });

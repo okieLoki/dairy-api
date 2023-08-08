@@ -344,7 +344,7 @@ const getRate = async (req, res) => {
             }
         }
 
-        return res.json({ rate });
+        return res.json({ rate: rate.toFixed(2) });
     } catch (error) {
         return res.status(400).json({
             status: "No rate chart found for this farmer",
