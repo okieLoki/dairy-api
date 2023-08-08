@@ -59,7 +59,7 @@ const addCollectionByUser = async (req, res) => {
             amount
         })
 
-        farmer.credit += amount;
+        farmer.credit += Number(amount);
         await farmer.save();
 
         return res.status(201).json('Collection added successfully');
@@ -128,7 +128,7 @@ const addCollectionByAdmin = async (req, res) => {
             amount
         })
 
-        farmer.credit += amount;
+        farmer.credit += Number(amount);
         await farmer.save();
 
         return res.status(201).json('Collection added successfully');
