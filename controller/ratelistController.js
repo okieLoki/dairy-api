@@ -1,3 +1,4 @@
+const Collection = require("../model/Collection");
 const Farmer = require("../model/Farmer");
 const RateList = require("../model/RateList");
 const User = require("../model/User");
@@ -310,6 +311,11 @@ const getRate = async (req, res) => {
 
         if (farmer.farmerLevel === 5) {
             rate = farmer.fixedRate;
+        }
+        else if (!fat && !snf) {
+            rate = await Collection.findOne({ userId: user._id }).sort({ collectionDate: -1 }).limit(1).then((collection) => collection.rate).catch((err) => {
+                console.log(err)
+            });
         } else {
             const rateChart = await RateList.findOne({
                 level: farmer.farmerLevel,

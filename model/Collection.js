@@ -21,11 +21,9 @@ const collectionSchema = new mongoose.Schema({
     },
     fat: {
         type: Number,
-        required: [true, 'FAT missing'],
     },
     snf: {
         type: Number,
-        required: [true, 'SNF missing'],
     },
     rate: {
         type: Number,
