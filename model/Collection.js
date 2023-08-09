@@ -15,6 +15,11 @@ const collectionSchema = new mongoose.Schema({
         default: Date.now(),
         required: [true, 'Collection Date missing'],
     },
+    shift: {
+        type: String,
+        enum: ['Morning', 'Evening'],
+        required: [true, 'Shift missing'],
+    },
     qty: {
         type: Number,
         required: [true, 'Quantity missing'],

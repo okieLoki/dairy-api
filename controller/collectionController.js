@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken')
 
 const addCollectionByUser = async (req, res) => {
     try {
-        const { farmerId, collectionDate, qty, fat, snf, rate, amount } = req.body;
+        const { farmerId, collectionDate, qty, fat, snf, rate, amount, shift } = req.body;
 
         const username = req.params.username;
 
@@ -29,9 +29,6 @@ const addCollectionByUser = async (req, res) => {
                 status: 'Invalid Farmer ID or The Farmer does not belong to the User',
             });
         }
-
-        const collectionHour = new Date(collectionDate).getHours();
-        const shift = collectionHour < 12 ? 'Morning' : 'Evening';
 
         await Collection.create({
             farmerId,
@@ -59,7 +56,7 @@ const addCollectionByUser = async (req, res) => {
             amount
         })
 
-        farmer.credit += Number(amount);
+        farmer.credit = farmer.credit + Number(amount);
         await farmer.save();
 
         return res.status(201).json('Collection added successfully');
@@ -75,9 +72,9 @@ const addCollectionByUser = async (req, res) => {
 const addCollectionByAdmin = async (req, res) => {
     try {
         const { username } = req.params;
-        const { farmerId, collectionDate, qty, fat, snf, rate, amount } = req.body;
+        const { farmerId, collectionDate, qty, fat, snf, rate, amount, shift } = req.body;
 
-        if (!username || !farmerId || !collectionDate || !qty || !rate || !amount) {
+        if (!username || !farmerId || !collectionDate || !qty || qty === 0 || !rate || rate === 0 || !amount || amount === 0) {
             return res.status(400).json({
                 message: 'Please provide all the details',
             });
@@ -96,9 +93,6 @@ const addCollectionByAdmin = async (req, res) => {
                 status: 'Invalid Farmer ID or The Farmer does not belong to the User',
             });
         }
-
-        const collectionHour = new Date(collectionDate).getHours();
-        const shift = collectionHour < 12 ? 'Morning' : 'Evening';
 
         await Collection.create({
             farmerId,
@@ -128,7 +122,7 @@ const addCollectionByAdmin = async (req, res) => {
             amount
         })
 
-        farmer.credit += Number(amount);
+        farmer.credit = farmer.credit + Number(amount);
         await farmer.save();
 
         return res.status(201).json('Collection added successfully');
@@ -144,7 +138,7 @@ const addCollectionByAdmin = async (req, res) => {
 const getAllCollectionsForDate = async (req, res) => {
     try {
         const { username } = req.params;
-        const { date } = req.query;
+        const { date, shift } = req.query;
         const formattedDate = new Date(date);
 
         if (isNaN(formattedDate)) {
@@ -158,7 +152,6 @@ const getAllCollectionsForDate = async (req, res) => {
         }
 
 
-
         const collections = await Collection.find({
             $and: [
                 { userId: user._id },
@@ -168,6 +161,7 @@ const getAllCollectionsForDate = async (req, res) => {
                             { $eq: [{ $dayOfMonth: '$collectionDate' }, { $dayOfMonth: formattedDate }] },
                             { $eq: [{ $month: '$collectionDate' }, { $month: formattedDate }] },
                             { $eq: [{ $year: '$collectionDate' }, { $year: formattedDate }] },
+                            { $eq: ['$shift', shift] }, // Match the shift value
                         ]
                     }
                 }

@@ -37,7 +37,7 @@ const settlePaymentByAdmin = async (req, res) => {
       farmerId,
       date,
       debit: amountToPay,
-      remarks: 'Payment',
+      remarks: remarks,
       userId: user._id
     })
 

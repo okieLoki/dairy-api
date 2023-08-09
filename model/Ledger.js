@@ -20,6 +20,7 @@ const ledgerSchema = new mongoose.Schema({
     },
     shift: {
         type: String,
+        enum: ['Morning', 'Evening'],
     },
     credit: {
         type: Number,
@@ -31,7 +32,6 @@ const ledgerSchema = new mongoose.Schema({
     },
     remarks: {
         type: String,
-        enum: ['Collection', 'Payment', 'Other']
     },
     userId: {
         type: mongoose.Schema.Types.ObjectId,
