@@ -292,6 +292,8 @@ const getRate = async (req, res) => {
         const { farmerId } = req.params;
         const username = req.params.username;
         const user = await User.findOne({ username });
+        const parsedFat = parseFloat(fat)
+        const parsedSnf = parseFloat(snf)
 
         if (!user) {
             return res.status(404).json({
@@ -310,13 +312,10 @@ const getRate = async (req, res) => {
         let rate = 0;
 
         if (farmer.farmerLevel === 5) {
+            console.log('fixed')
             rate = farmer.fixedRate;
-        }
-        else if (!fat && !snf) {
-            rate = await Collection.findOne({ userId: user._id }).sort({ collectionDate: -1 }).limit(1).then((collection) => collection.rate).catch((err) => {
-                console.log(err)
-            });
-        } else {
+        } else if (parsedFat !== 0 && parsedSnf !== 0) {
+            console.log('new')
             const rateChart = await RateList.findOne({
                 level: farmer.farmerLevel,
                 userId: user._id,
@@ -327,14 +326,14 @@ const getRate = async (req, res) => {
             switch (rateChart.category) {
                 case "KGFAT + KGSNF":
                     rate =
-                        (stdFatRate * fat) +
-                        (stdSNFRate * snf) +
-                        (Number(fat) + Number(snf)) * stdTSRate +
+                        (stdFatRate * parsedFat) +
+                        (stdSNFRate * parsedSnf) +
+                        (parsedFat + parsedSnf) * stdTSRate +
                         incentive;
                     break;
 
                 case "KG FAT ONLY":
-                    rate = (stdFatRate * fat) + incentive;
+                    rate = (stdFatRate * parsedFat) + incentive;
                     break;
 
                 default:
@@ -342,7 +341,15 @@ const getRate = async (req, res) => {
                         error: "Invalid Category",
                     });
             }
+        } else {
+            const collection = await Collection.findOne({ userId: user._id, farmerId }).sort({ collectionDate: -1 }).limit(1)
+            console.log(collection)
+            rate = await Collection.findOne({ userId: user._id, farmerId }).sort({ collectionDate: -1 }).limit(1).then((collection) => collection.rate).catch((err) => {
+                console.log(err)
+            });
         }
+
+        console.log(rate)
 
         return res.json({ rate: rate.toFixed(2) });
     } catch (error) {
