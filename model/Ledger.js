@@ -38,6 +38,10 @@ const ledgerSchema = new mongoose.Schema({
         required: [true, 'User ID missing'],
         ref: 'User'
     },
+    collectionId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Collection'
+    }
 })
 
 const Ledger = mongoose.model('Ledger', ledgerSchema)

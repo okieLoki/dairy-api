@@ -53,7 +53,8 @@ const addCollectionByUser = async (req, res) => {
             shift,
             fat,
             snf,
-            amount
+            amount,
+            collectionId: collection._id
         })
 
         farmer.credit = farmer.credit + Number(amount);
@@ -94,7 +95,7 @@ const addCollectionByAdmin = async (req, res) => {
             });
         }
 
-        await Collection.create({
+        const collection = await Collection.create({
             farmerId,
             farmerName: farmer.farmerName,
             qty,
@@ -119,7 +120,8 @@ const addCollectionByAdmin = async (req, res) => {
             shift,
             fat,
             snf,
-            amount
+            amount,
+            collectionId: collection._id
         })
 
         farmer.credit = farmer.credit + Number(amount);
@@ -133,6 +135,90 @@ const addCollectionByAdmin = async (req, res) => {
         });
     }
 };
+
+const getCollectionById = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const collection = await Collection.findById(id);
+
+        if (!collection) {
+            return res.status(404).json({ message: 'Collection not found' });
+        }
+
+        return res.status(200).json(collection);
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'An error occurred while processing the request',
+        });
+    }
+}
+
+const updateCollection = async (req, res) => {
+    try {
+        const { id, username } = req.params;
+        const { farmerId, collectionDate, qty, fat, snf, rate, amount, shift } = req.body;
+
+        const user = await User.findOne({ username })
+
+        if (!user) {
+            return res.status(404).send({ message: 'No user found' });
+        }
+
+        const farmer = await Farmer.findOne({ userId: user._id, farmerId });
+
+        if (!farmer) {
+            return res.status(400).json({
+                status: 'Invalid Farmer ID or The Farmer does not belong to the User',
+            });
+        }
+
+        const collection = await Collection.findById(id);
+
+        if (!collection) {
+            return res.status(404).json({ message: 'Collection not found' });
+        }
+
+        if (amount) {
+            farmer.credit = farmer.credit - Number(collection.amount) + Number(amount);
+        }
+
+        collection.amount = amount || collection.amount;
+        collection.collectionDate = collectionDate || collection.collectionDate;
+        collection.fat = fat || collection.fat;
+        collection.qty = qty || collection.qty;
+        collection.rate = rate || collection.rate;
+        collection.snf = snf || collection.snf;
+        collection.shift = shift || collection.shift;
+
+        const ledger = await Ledger.findOne({ collectionId: id });
+
+        if (!ledger) {
+            return res.status(404).json({ message: 'Ledger not found' });
+        }
+
+        ledger.credit = amount || ledger.credit;
+        ledger.date = collectionDate || ledger.date;
+        ledger.fat = fat || ledger.fat;
+        ledger.qty = qty || ledger.qty;
+        ledger.snf = snf || ledger.snf;
+        ledger.shift = shift || ledger.shift
+
+        await collection.save();
+        await ledger.save();
+        await farmer.save();
+
+        return res.status(200).json('Collection updated successfully');
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'An error occurred while processing the request',
+        });
+    }
+}
 
 
 const getAllCollectionsForDate = async (req, res) => {
@@ -424,4 +510,4 @@ const getAverageSNFByUser = async (req, res) => {
 };
 
 
-module.exports = { addCollectionByUser, addCollectionByAdmin, getAllCollectionsForDate, getTotalMilkByAdmin, getTotalMilkByUser, getAverageFatByAdmin, getAverageFatByUser, getAverageSNFByAdmin, getAverageSNFByUser }
+module.exports = { addCollectionByUser, addCollectionByAdmin, getAllCollectionsForDate, getTotalMilkByAdmin, getTotalMilkByUser, getAverageFatByAdmin, getAverageFatByUser, getAverageSNFByAdmin, getAverageSNFByUser, updateCollection, getCollectionById }

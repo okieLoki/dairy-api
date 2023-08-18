@@ -9,7 +9,7 @@ const { authAdmin, authUser } = require('../middleware/auth');
 const { settlePaymentByUser } = require('../controller/paymentController');
 const { getAllLedgerEntriesForRange } = require('../controller/ledgerController');
 const { getAllDuesByUser } = require('../controller/duesController');
-const { addCollectionByUser, getAllCollectionsForDate, getTotalMilkByUser, getAverageFatByUser, getAverageSNFByUser } = require('../controller/collectionController');
+const { addCollectionByUser, getAllCollectionsForDate, getTotalMilkByUser, getAverageFatByUser, getAverageSNFByUser, updateCollection, getCollectionById } = require('../controller/collectionController');
 
 // AUTHENTICATION 
 router.post('/login', loginUser)
@@ -35,6 +35,8 @@ router.post('/:username/payment', authUser, settlePaymentByUser)
 // COLLECTION ROUTING
 router.post('/:username/collection', authUser, addCollectionByUser)
 router.get('/:username/collection', authUser, getAllCollectionsForDate)
+router.put('/:username/collection/:id', authAdmin, updateCollection)
+router.get('/:username/collection/:id', authAdmin, getCollectionById)
 router.get('/:username/collection/totalmilk', authUser, getTotalMilkByUser)
 router.get('/:username/collection/avgfat', authUser, getAverageFatByUser)
 router.get('/:username/collection/avgsnf', authUser, getAverageSNFByUser)

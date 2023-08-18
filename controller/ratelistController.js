@@ -312,10 +312,8 @@ const getRate = async (req, res) => {
         let rate = 0;
 
         if (farmer.farmerLevel === 5) {
-            console.log('fixed')
             rate = farmer.fixedRate;
         } else if (parsedFat !== 0 && parsedSnf !== 0) {
-            console.log('new')
             const rateChart = await RateList.findOne({
                 level: farmer.farmerLevel,
                 userId: user._id,
@@ -348,8 +346,6 @@ const getRate = async (req, res) => {
                 console.log(err)
             });
         }
-
-        console.log(rate)
 
         return res.json({ rate: rate.toFixed(2) });
     } catch (error) {
