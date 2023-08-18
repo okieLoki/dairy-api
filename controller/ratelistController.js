@@ -340,8 +340,6 @@ const getRate = async (req, res) => {
                     });
             }
         } else {
-            const collection = await Collection.findOne({ userId: user._id, farmerId }).sort({ collectionDate: -1 }).limit(1)
-            console.log(collection)
             rate = await Collection.findOne({ userId: user._id, farmerId }).sort({ collectionDate: -1 }).limit(1).then((collection) => collection.rate).catch((err) => {
                 console.log(err)
             });

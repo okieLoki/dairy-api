@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { loginUser, registerUser, getAllUsers } = require('../controller/userController');
+const { loginUser, registerUser, getAllUsers, getUser, deleteUser, getUserPermissions, updateUser } = require('../controller/userController');
 const { addFarmerAsUser, getAllFarmers, getLatestFarmerIdByUser } = require('../controller/farmerController')
 const { getRate, getAllRateList, addRateListByUser } = require('../controller/ratelistController')
 
@@ -15,6 +15,9 @@ const { addCollectionByUser, getAllCollectionsForDate, getTotalMilkByUser, getAv
 router.post('/login', loginUser)
 router.post('/signup', authAdmin, registerUser);
 router.get('/', authAdmin, getAllUsers)
+router.get('/:username', authAdmin, getUser)
+router.put('/:username', authAdmin, updateUser)
+router.get('/:username/permissions', authAdmin, getUserPermissions)
 
 // FARMERS ROUTING
 router.get('/:username/farmer/latestid/', authUser, getLatestFarmerIdByUser)

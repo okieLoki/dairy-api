@@ -101,6 +101,55 @@ const loginUser = async (req, res) => {
 
 }
 
+const getUser = async (req, res) => {
+    try {
+        const { username } = req.params
+
+        const user = await User.findOne({ username })
+
+        if (!user) {
+            return res.status(404).json({
+                error: 'User not found',
+            });
+        }
+
+        res.status(200).json(user)
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'An error occurred while processing the request',
+        });
+    }
+}
+
+
+const updateUser = async (req, res) => {
+    try {
+        const { username } = req.params
+
+        const user = await User.findOne({ username })
+
+        if (!user) {
+            return res.status(404).json({
+                error: 'User not found',
+            });
+        }
+
+        const update = {
+            $set: req.body
+        };
+
+        await User.updateOne({ username }, update)
+
+        res.status(200).json('User updated successfully')
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'An error occurred while processing the request',
+        });
+    }
+}
+
 
 const getAllUsers = async (req, res) => {
     try {
@@ -127,4 +176,25 @@ const getAllUsers = async (req, res) => {
     }
 }
 
-module.exports = { registerUser, loginUser, getAllUsers }
+const getUserPermissions = async (req, res) => {
+    try {
+        const { username } = req.params
+        const user = await User.findOne({ username })
+        if (!user) {
+            return res.status(404).json({
+                error: 'User not found',
+            });
+        }
+
+        const permissions = user.permissions
+        return res.status(200).json(permissions)
+    }
+    catch (err) {
+        console.log(err)
+        res.status(500).json({
+            error: 'An error occurred while processing the request',
+        })
+    }
+}
+
+module.exports = { registerUser, loginUser, getAllUsers, getUser, updateUser, getUserPermissions }
