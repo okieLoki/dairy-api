@@ -57,7 +57,7 @@ const addCollectionByUser = async (req, res) => {
             collectionId: collection._id
         })
 
-        farmer.credit = farmer.credit + Number(amount);
+        farmer.credit = (farmer.credit + Number(amount)).toFixed(2);
         await farmer.save();
 
         return res.status(201).json('Collection added successfully');
@@ -124,7 +124,7 @@ const addCollectionByAdmin = async (req, res) => {
             collectionId: collection._id
         })
 
-        farmer.credit = farmer.credit + Number(amount);
+        farmer.credit = (farmer.credit + Number(amount)).toFixed(2);
         await farmer.save();
 
         return res.status(201).json('Collection added successfully');

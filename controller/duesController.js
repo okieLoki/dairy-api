@@ -66,7 +66,7 @@ const getAllDuesByAdmin = async (req, res) => {
             return {
                 farmerId: farmer.farmerId,
                 farmerName: farmer.farmerName,
-                dues: farmer.credit - farmer.debit
+                dues: (farmer.credit - farmer.debit).toFixed(2)
             }
         })
 
