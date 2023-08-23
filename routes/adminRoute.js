@@ -3,12 +3,12 @@ const router = express.Router();
 
 const { register, login } = require('../controller/adminController');
 const { getAllLedgerEntriesForRangeByAdmin } = require('../controller/ledgerController');
-const { addRateList, getAllRateList, getRate, deleteRateList, updateRateListById, getRateListById } = require('../controller/ratelistController');
+const { addRateList, getRate, deleteRateList, updateRateListById, getRateListById, getAllRateListByAdmin } = require('../controller/ratelistController');
 const { deleteFarmer, addFarmerAsAdmin, getAllFarmers, updateFarmerById, getFarmerById, getLatestFarmerIdByAdmin } = require('../controller/farmerController');
 const { settlePaymentByAdmin } = require('../controller/paymentController');
 const { getAllDuesByAdmin } = require('../controller/duesController');
 const { authAdmin } = require('../middleware/auth');
-const { addCollectionByAdmin, getAllCollectionsForDate, getAverageFatByAdmin, getAverageSNFByAdmin, getTotalMilkByAdmin, updateCollection, getCollectionById } = require('../controller/collectionController');
+const { addCollection, getAllCollectionsForDate, getAverageFatByAdmin, getAverageSNFByAdmin, getTotalMilkByAdmin, updateCollection, getCollectionById } = require('../controller/collectionController');
 const { getBillDetails, addBillDetails, updateBillDetails } = require('../controller/billController');
 
 // AUTHENTICATION 
@@ -29,7 +29,7 @@ router.get('/:username/ratelist/:id', authAdmin, getRateListById)
 router.get('/:username/ratelist/:farmerId/rate', authAdmin, getRate)
 router.put('/:username/ratelist/:id', authAdmin, updateRateListById)
 router.delete('/:username/ratelist/:id', authAdmin, deleteRateList)
-router.get('/:username/ratelist', authAdmin, getAllRateList)
+router.get('/:username/ratelist', authAdmin, getAllRateListByAdmin)
 
 // LEDGER ROUTING
 router.get('/:username/ledger', authAdmin, getAllLedgerEntriesForRangeByAdmin)
@@ -39,7 +39,7 @@ router.get('/:username/ledger', authAdmin, getAllLedgerEntriesForRangeByAdmin)
 router.post('/:username/payment', authAdmin, settlePaymentByAdmin)
 
 // COLLECTION ROUTING
-router.post('/:username/collection', authAdmin, addCollectionByAdmin)
+router.post('/:username/collection', authAdmin, addCollection)
 router.get('/:username/collection', authAdmin, getAllCollectionsForDate)
 router.put('/:username/collection/:id', authAdmin, updateCollection)
 router.get('/:username/collection/:id', authAdmin, getCollectionById)

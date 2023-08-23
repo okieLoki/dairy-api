@@ -159,7 +159,7 @@ const addRateListByUser = async (req, res) => {
 };
 
 
-const getAllRateList = async (req, res) => {
+const getAllRateListByAdmin = async (req, res) => {
     try {
         const username = req.params.username;
         const user = await User.findOne({ username });
@@ -167,6 +167,33 @@ const getAllRateList = async (req, res) => {
         if (!user) {
             return res.status(404).json({
                 error: "User not found",
+            });
+        }
+
+        const rateLists = await RateList.find({ userId: user._id });
+        res.status(200).json(rateLists);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: "An error occurred while processing the request",
+        });
+    }
+};
+
+const getAllRateListByUser = async (req, res) => {
+    try {
+        const username = req.params.username;
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(404).json({
+                error: "User not found",
+            });
+        }
+
+        if (user.permissions === "Not Allow") {
+            return res.status(403).json({
+                error: "Permission denied. User is not allowed to view rate lists.",
             });
         }
 
@@ -353,4 +380,4 @@ const getRate = async (req, res) => {
     }
 };
 
-module.exports = { addRateList, addRateListByUser, getAllRateList, getRateListById, updateRateListById, deleteRateList, getRate };
+module.exports = { addRateList, addRateListByUser, getAllRateListByAdmin, getAllRateListByUser, getRateListById, updateRateListById, deleteRateList, getRate };
