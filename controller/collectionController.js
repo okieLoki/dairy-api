@@ -285,13 +285,12 @@ const getAverageFatByAdmin = async (req, res) => {
         const token = req.headers.authorization.split(' ')[1];
         const admin_id = jwt.decode(token).admin_id;
 
-        let averageFat;
+        let totalFat, totalMilk, averageFat;
 
         const users = await User.find({ adminId: admin_id });
         const userIds = users.map((user) => user._id);
 
-        // Fetch average Fat for all users under the admin
-        averageFat = await Collection.aggregate([
+        totalMilk = await Collection.aggregate([
             {
                 $match: {
                     collectionDate: {
@@ -299,19 +298,43 @@ const getAverageFatByAdmin = async (req, res) => {
                         $lte: new Date(end),
                     },
                     userId: { $in: userIds }, // Filter collections by userIds array
-                    fat: { $ne: null },
-                    snf: { $ne: null }
+                    fat: { $ne: 0 },
+                    snf: { $ne: 0 }
                 },
             },
             {
                 $group: {
                     _id: null,
-                    averageFat: {
-                        $avg: '$fat',
+                    totalMilk: {
+                        $sum: '$qty',
                     },
                 },
             },
         ]);
+
+        totalFat = await Collection.aggregate([
+            {
+                $match: {
+                    collectionDate: {
+                        $gte: new Date(start),
+                        $lte: new Date(end),
+                    },
+                    userId: { $in: userIds },
+                    fat: { $ne: 0 }
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalFat: {
+                        $sum: { $multiply: ['$qty', '$fat'] }, // Calculate totalFat as qty * fat
+                    },
+                },
+            },
+        ]);
+
+        averageFat = (totalFat[0].totalFat / totalMilk[0].totalMilk).toFixed(2);
+
         res.status(200).json(averageFat);
     } catch (error) {
         console.log(error);
@@ -397,13 +420,12 @@ const getAverageSNFByAdmin = async (req, res) => {
         const token = req.headers.authorization.split(' ')[1];
         const admin_id = jwt.decode(token).admin_id;
 
-        let averageSNF;
+        let totalMilk, averageSNF, totalSNF;
 
         const users = await User.find({ adminId: admin_id });
         const userIds = users.map((user) => user._id);
 
-        // Fetch average SNF for all users under the admin
-        averageSNF = await Collection.aggregate([
+        totalMilk = await Collection.aggregate([
             {
                 $match: {
                     collectionDate: {
@@ -411,17 +433,42 @@ const getAverageSNFByAdmin = async (req, res) => {
                         $lte: new Date(end),
                     },
                     userId: { $in: userIds }, // Filter collections by userIds array
+                    fat: { $ne: 0 },
+                    snf: { $ne: 0 }
                 },
             },
             {
                 $group: {
                     _id: null,
-                    averageSNF: {
-                        $avg: '$snf',
+                    totalMilk: {
+                        $sum: '$qty',
                     },
                 },
             },
         ]);
+
+        totalSNF = await Collection.aggregate([
+            {
+                $match: {
+                    collectionDate: {
+                        $gte: new Date(start),
+                        $lte: new Date(end),
+                    },
+                    userId: { $in: userIds },
+                    fat: { $ne: 0 }
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalSNF: {
+                        $sum: { $multiply: ['$qty', '$snf'] }, // Calculate totalFat as qty * fat
+                    },
+                },
+            },
+        ]);
+
+        averageSNF = (totalSNF[0].totalSNF / totalMilk[0].totalMilk).toFixed(2);
         res.status(200).json(averageSNF);
     } catch (error) {
         console.log(error);
