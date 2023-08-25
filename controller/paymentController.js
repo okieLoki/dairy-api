@@ -25,6 +25,8 @@ const settlePaymentByAdmin = async (req, res) => {
       return res.status(404).send({ message: 'No farmer found' });
     }
 
+    let previousBalance = Number(farmer.credit) - Number(farmer.debit);
+
     await Payment.create({
       farmerId,
       date,
@@ -38,7 +40,8 @@ const settlePaymentByAdmin = async (req, res) => {
       date,
       debit: amountToPay,
       remarks: remarks,
-      userId: user._id
+      userId: user._id,
+      previousBalance: previousBalance,
     })
 
     farmer.debit = farmer.debit + Number(amountToPay);
@@ -83,6 +86,7 @@ const settlePaymentByUser = async (req, res) => {
       return res.status(404).send({ message: 'No farmer found' });
     }
 
+    let previousBalance = Number(farmer.credit) - Number(farmer.debit);
 
     await Payment.create({
       farmerId,
@@ -97,7 +101,8 @@ const settlePaymentByUser = async (req, res) => {
       date,
       debit: amountToPay,
       remarks: 'Payment',
-      userId: user._id
+      userId: user._id,
+      previousBalance: previousBalance,
     })
 
     farmer.debit = farmer.debit + Number(amountToPay);

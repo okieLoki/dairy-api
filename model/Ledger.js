@@ -30,6 +30,10 @@ const ledgerSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    previousBalance: {
+        type: Number,
+        default: 0
+    },
     remarks: {
         type: String,
     },

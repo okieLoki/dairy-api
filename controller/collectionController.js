@@ -42,7 +42,7 @@ const addCollection = async (req, res) => {
             shift
         });
 
-
+        let previousBalance = Number(farmer.credit) - Number(farmer.debit);
 
         await Ledger.create({
             farmerId,
@@ -55,6 +55,7 @@ const addCollection = async (req, res) => {
             fat,
             snf,
             amount,
+            previousBalance: previousBalance,
             collectionId: collection._id
         })
 
