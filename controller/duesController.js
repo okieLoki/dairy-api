@@ -84,19 +84,25 @@ const getAllDuesByAdmin = async (req, res) => {
 
 const getPreviousDues = async (req, res) => {
     try {
-        const username = req.params.username
+        const { username, farmerId } = req.params
         const { startDate, endDate } = req.query
         const formattedStartDate = new Date(startDate);
         const formattedEndDate = new Date(endDate);
+
 
         if (isNaN(formattedStartDate) || isNaN(formattedEndDate)) {
             return res.status(400).json({ message: 'Invalid date format' });
         }
 
         const user = await User.findOne({ username })
+        const farmer = await Farmer.findOne({ farmerId })
 
         if (!user) {
             return res.status(404).send({ message: 'User not found' })
+        }
+
+        if (!farmer) {
+            return res.status(404).send({ message: 'Farmer not found' })
         }
 
         // Set the time part of the dates to midnight (00:00:00) to compare just the date part
@@ -109,7 +115,10 @@ const getPreviousDues = async (req, res) => {
 
         const ledgerEntries = await Ledger.find({
             $and: [
-                { userId: user._id },
+                {
+                    userId: user._id,
+                    farmerId: farmer.farmerId
+                },
                 {
                     $expr: {
                         $and: [
