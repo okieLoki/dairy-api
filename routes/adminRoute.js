@@ -6,7 +6,7 @@ const { getAllLedgerEntriesForRangeByAdmin } = require('../controller/ledgerCont
 const { addRateList, getRate, deleteRateList, updateRateListById, getRateListById, getAllRateListByAdmin } = require('../controller/ratelistController');
 const { deleteFarmer, addFarmerAsAdmin, getAllFarmers, updateFarmerById, getFarmerById, getLatestFarmerIdByAdmin } = require('../controller/farmerController');
 const { settlePaymentByAdmin } = require('../controller/paymentController');
-const { getAllDuesByAdmin } = require('../controller/duesController');
+const { getAllDuesByAdmin, getPreviousDues } = require('../controller/duesController');
 const { authAdmin } = require('../middleware/auth');
 const { addCollection, getAllCollectionsForDate, getAverageFatByAdmin, getAverageSNFByAdmin, getTotalMilkByAdmin, updateCollection, getCollectionById } = require('../controller/collectionController');
 const { getBillDetails, addBillDetails, updateBillDetails } = require('../controller/billController');
@@ -49,6 +49,7 @@ router.get('/collection/avgsnf', authAdmin, getAverageSNFByAdmin)
 
 // DUES ROUTING
 router.get('/:username/dues', authAdmin, getAllDuesByAdmin)
+router.get('/:username/dues/prev', authAdmin, getPreviousDues)
 
 // BILL DETAILS
 router.get('/bill', authAdmin, getBillDetails)

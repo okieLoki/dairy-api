@@ -8,7 +8,7 @@ const { getRate, addRateListByUser, getAllRateListByUser } = require('../control
 const { authAdmin, authUser } = require('../middleware/auth');
 const { settlePaymentByUser } = require('../controller/paymentController');
 const { getAllLedgerEntriesForRange } = require('../controller/ledgerController');
-const { getAllDuesByUser } = require('../controller/duesController');
+const { getAllDuesByUser, getPreviousDues } = require('../controller/duesController');
 const { getAllCollectionsForDate, getTotalMilkByUser, getAverageFatByUser, getAverageSNFByUser, updateCollection, getCollectionById, addCollection } = require('../controller/collectionController');
 
 // AUTHENTICATION 
@@ -47,5 +47,6 @@ router.get('/:username/collection', authUser, getAllCollectionsForDate)
 
 // DUES ROUTING
 router.get('/:username/dues', authUser, getAllDuesByUser)
+router.get('/:username/dues/prev', authUser, getPreviousDues)
 
 module.exports = router;
