@@ -46,7 +46,7 @@ router.get('/:username/collection', authUser, getAllCollectionsForDate)
 
 
 // DUES ROUTING
+router.get('/:username/dues/:farmerId/prev', authUser, getPreviousDues)
 router.get('/:username/dues', authUser, getAllDuesByUser)
-router.get('/:username/dues/prev', authUser, getPreviousDues)
 
 module.exports = router;
