@@ -141,7 +141,7 @@ const sendForgotPasswordMail = async (req, res) => {
 
         await Promise.all([
             user.save(),
-            sendEmail(email, url)
+            sendEmail(user, url)
         ]).finally(() => {
             return res.status(200).json({
                 message: 'Email sent successfully',

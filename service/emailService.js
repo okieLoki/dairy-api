@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
+const htmlContent = require('./emailTemplate')
 
-const sendEmail = async (email, url) => {
-
+const sendEmail = async (user, url) => {
     try {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
@@ -12,11 +12,10 @@ const sendEmail = async (email, url) => {
         });
 
         await transporter.sendMail({
-            from: '"RESET PASSWORD" <testuddeepta@gmail.com>',
-            to: email,
-            subject: "Link to reset password",
-            text: "",
-            html: url,
+            from: '"Password Reset" <testuddeepta@gmail.com>',
+            to: user.email,
+            subject: "Password Reset Request",
+            html: htmlContent(user, url)
         });
 
     } catch (error) {
@@ -25,3 +24,4 @@ const sendEmail = async (email, url) => {
 }
 
 module.exports = sendEmail;
+1
