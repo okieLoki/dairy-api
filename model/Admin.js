@@ -6,7 +6,6 @@ const adminSchema = new mongoose.Schema({
         required: [true, 'Email required'],
         unique: true,
     },
-
     name: {
         type: String,
         required: [true, 'Name missing'],
@@ -30,6 +29,10 @@ const adminSchema = new mongoose.Schema({
     },
     token: {
         type: String
+    },
+    tokenGeneratedForgotPassword: {
+        type: Boolean,
+        default: false
     }
 })
 

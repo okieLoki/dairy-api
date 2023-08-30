@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { register, login } = require('../controller/adminController');
+const { register, login, sendForgotPasswordMail, changePassword, renderForgotPasswordPage} = require('../controller/adminController');
 const { getAllLedgerEntriesForRangeByAdmin } = require('../controller/ledgerController');
 const { addRateList, getAllRateList, getRate, deleteRateList, updateRateListById, getRateListById } = require('../controller/ratelistController');
 const { deleteFarmer, addFarmerAsAdmin, getAllFarmers, updateFarmerById, getFarmerById, getLatestFarmerIdByAdmin } = require('../controller/farmerController');
@@ -14,6 +14,10 @@ const { getBillDetails, addBillDetails, updateBillDetails } = require('../contro
 // AUTHENTICATION 
 router.post('/signup', register);
 router.post('/login', login)
+router.post('/forgot-password', sendForgotPasswordMail)
+router.post('/reset-password', changePassword)
+router.get('/reset-password/:token', renderForgotPasswordPage)
+
 
 // FARMERS ROUTING
 router.post('/:username/farmer/', authAdmin, addFarmerAsAdmin)
