@@ -5,24 +5,29 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
-    "start": "node index.js",
-    "postinstall": "pm2 start index.js --name dairy-api"
+    "start": "node index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "axios": "^1.4.0",
+    "axios": "^1.5.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
+    "cryptr": "^6.2.0",
     "date-fns-tz": "^2.0.0",
     "dotenv": "^16.3.1",
-    "easyinvoice": "^3.0.23",
+    "ejs": "^3.1.9",
     "email-validator": "^2.0.4",
     "express": "^4.18.2",
+    "express-react-views": "^0.11.0",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.3.1",
+    "nodemailer": "^6.9.4",
     "pdfkit-table": "^0.1.99",
     "pm2": "^5.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
