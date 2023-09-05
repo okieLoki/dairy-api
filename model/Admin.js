@@ -27,12 +27,16 @@ const adminSchema = new mongoose.Schema({
         type: Date,
         required: [true, 'Expiry date required'],
     },
-    token: {
-        type: String
+    resetPasswordToken: {
+        type: String,
+        default: null, // Initialize it as null
     },
-    tokenGeneratedForgotPassword: {
-        type: Boolean,
-        default: false
+    resetPasswordTokenExpires: {
+        type: Date,
+        default: null, // Initialize it as null
+    },
+    token: {
+        type: String,
     }
 })
 
