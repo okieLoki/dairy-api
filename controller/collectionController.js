@@ -46,6 +46,7 @@ const addCollection = async (req, res) => {
 
         await Ledger.create({
             farmerId,
+            farmerName: farmer.farmerName,
             date: collectionDate,
             credit: amount,
             remarks: 'Collection',
