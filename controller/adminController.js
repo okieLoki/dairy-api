@@ -135,7 +135,7 @@ const sendForgotPasswordMail = async (req, res) => {
             }
         );
 
-        const url = `http://localhost:5001/api/admin/reset-password/${token}`;
+        const url = `${process.env.BASE_URL}/api/admin/reset-password/${token}`;
 
         user.tokenGeneratedForgotPassword = true;
 
