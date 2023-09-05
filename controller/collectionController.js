@@ -334,6 +334,8 @@ const getAverageFatByAdmin = async (req, res) => {
             },
         ]);
 
+        if (totalFat.length === 0 || totalMilk.length === 0) return 0
+    
         averageFat = (totalFat[0].totalFat / totalMilk[0].totalMilk).toFixed(2);
 
         res.status(200).json(averageFat);
@@ -400,6 +402,8 @@ const getAverageFatByUser = async (req, res) => {
                 },
             },
         ]);
+
+        if (totalFat.length === 0 || totalMilk.length === 0) return 0
 
         averageFat = (totalFat[0].totalFat / totalMilk[0].totalMilk).toFixed(2);
 
@@ -468,6 +472,7 @@ const getAverageSNFByAdmin = async (req, res) => {
                 },
             },
         ]);
+        if (totalSNF.length === 0 || totalMilk.length === 0) return 0
 
         averageSNF = (totalSNF[0].totalSNF / totalMilk[0].totalMilk).toFixed(2);
         res.status(200).json(averageSNF);
@@ -535,8 +540,8 @@ const getAverageSNFByUser = async (req, res) => {
             },
         ]);
 
+        if (totalSNF.length === 0 || totalMilk.length === 0) return 0
         averageSNF = (totalSNF[0].totalSNF / totalMilk[0].totalMilk).toFixed(2);
-
 
         res.status(200).json(averageSNF);
     } catch (error) {
