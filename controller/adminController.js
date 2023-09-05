@@ -125,6 +125,7 @@ const sendForgotPasswordMail = async (req, res) => {
             });
         }
 
+        // Generate a unique reset password token
         const token = jwt.sign(
             {
                 admin_id: user._id,
@@ -135,19 +136,22 @@ const sendForgotPasswordMail = async (req, res) => {
             }
         );
 
-        const url = `${process.env.BASE_URL}/api/admin/reset-password/${token}`;
+        // Store the reset password token in the user object
+        user.resetPasswordToken = token;
+        user.resetPasswordTokenExpires = Date.now() + 30 * 60 * 1000; // 30 minutes
 
-        user.tokenGeneratedForgotPassword = true;
+        // Save the user with the reset password token
+        await user.save();
 
-        await Promise.all([
-            user.save(),
-            sendEmail(user, url)
-        ]).finally(() => {
-            return res.status(200).json({
-                message: 'Email sent successfully',
-            });
+        // Construct the reset password URL
+        const resetPasswordURL = `${process.env.BASE_URL}/api/admin/reset-password/${token}`;
+
+        // Send an email with the reset password URL
+        await sendEmail(user, resetPasswordURL);
+
+        return res.status(200).json({
+            message: 'Email sent successfully',
         });
-
     } catch (error) {
         console.error(error);
         return res.status(500).json({
@@ -157,79 +161,77 @@ const sendForgotPasswordMail = async (req, res) => {
 };
 
 const renderForgotPasswordPage = async (req, res) => {
-    const token = req.params.token;
+    const { token } = req.params;
 
     if (!token) {
         return res.status(400).json({
-            status: 'Missing Token'
-        })
+            status: 'Missing Token',
+        });
     }
 
     try {
-        decodedToken = jwt.verify(token, process.env.SECRET_KEY)
+        const user = await Admin.findOne({
+            resetPasswordToken: token,
+            resetPasswordTokenExpires: { $gt: Date.now() }, 
+        });
 
-        const user = await Admin.findById(decodedToken.admin_id);
-
-        if (!user || !user.tokenGeneratedForgotPassword) {
-            res.status(400).json({
-                status: 'Invalid Link'
-            })
+        if (!user) {
+            return res.status(500).render('errorPage')
         }
 
         res.render('forgotPassword', {
             title: 'Forgot Password Page',
-            token: token
-        })
+            token,
+        });
     } catch (error) {
         console.error(error);
-        return res.render('errorPage', {
-            title: 'Error Page'
-        })
+        return res.status(500).render('errorPage')
     }
-}
+};
 
 const changePassword = async (req, res) => {
-
     const { token, password } = req.body;
-
-    console.log(token);
-    console.log(password);
 
     if (!token) {
         return res.status(400).json({
-            status: 'Missing Token'
-        })
+            status: 'Missing Token',
+        });
     }
 
     try {
+        const user = await Admin.findOne({
+            resetPasswordToken: token,
+            resetPasswordTokenExpires: { $gt: Date.now() }, 
+        });
 
-        console.log(token);
-        decodedToken = jwt.verify(token, process.env.SECRET_KEY)
-
-        const user = await Admin.findById(decodedToken.admin_id);
-
-        if (!user || !user.tokenGeneratedForgotPassword) {
+        if (!user) {
             return res.status(400).json({
-                status: 'Invalid Link'
-            })
+                status: 'Invalid or expired token',
+            });
         }
 
-        user.password = password
-        user.tokenGeneratedForgotPassword = false
+        user.password = password;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordTokenExpires = undefined;
 
-        await user.save().finally(() => {
-            res.status(200).json({
-                status: 'Password Changed'
-            })
-        })
+        // Save the updated user object
+        await user.save();
 
+        return res.status(200).json({
+            status: 'Password Changed',
+        });
     } catch (error) {
         console.error(error);
         return res.status(500).json({
             error: 'An error occurred while processing the request',
         });
     }
-}
+};
 
-
-module.exports = { register, login, sendForgotPasswordMail, changePassword, renderForgotPasswordPage }
+module.exports = {
+    register,
+    login,
+    sendForgotPasswordMail,
+    changePassword,
+    renderForgotPasswordPage,
+};
