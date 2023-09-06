@@ -27,28 +27,30 @@ const settlePaymentByAdmin = async (req, res) => {
 
     let previousBalance = Number(farmer.credit) - Number(farmer.debit);
 
-    await Payment.create({
-      farmerId,
-      date,
-      amountToPay,
-      remarks,
-      userId: user._id
-    });
-
-    await Ledger.create({
-      farmerId,
-      date,
-      debit: amountToPay,
-      remarks: remarks,
-      userId: user._id,
-      previousBalance: previousBalance,
+    Promise.all([
+      Payment.create({
+        farmerId,
+        farmerName: farmer.farmerName,
+        date,
+        amountToPay,
+        remarks,
+        userId: user._id
+      }),
+      Ledger.create({
+        farmerId,
+        farmerName: farmer.farmerName,
+        date,
+        debit: amountToPay,
+        remarks: remarks,
+        userId: user._id,
+        previousBalance: previousBalance,
+      }),
+    ]).then(() => {
+      farmer.debit = farmer.debit + Number(amountToPay),
+        farmer.save()
+    }).finally(() => {
+      return res.status(200).json({ message: 'Payment successfully made' })
     })
-
-    farmer.debit = farmer.debit + Number(amountToPay);
-    await farmer.save();
-
-
-    return res.status(200).json({ message: 'Payment successfully made' })
 
   } catch (error) {
     console.log(error);
@@ -88,28 +90,30 @@ const settlePaymentByUser = async (req, res) => {
 
     let previousBalance = Number(farmer.credit) - Number(farmer.debit);
 
-    await Payment.create({
-      farmerId,
-      date,
-      amountToPay,
-      remarks,
-      userId: user._id
-    });
-
-    await Ledger.create({
-      farmerId,
-      date,
-      debit: amountToPay,
-      remarks: 'Payment',
-      userId: user._id,
-      previousBalance: previousBalance,
+    Promise.all([
+      Payment.create({
+        farmerId,
+        farmerName: farmer.farmerName,
+        date,
+        amountToPay,
+        remarks,
+        userId: user._id
+      }),
+      Ledger.create({
+        farmerId,
+        farmerName: farmer.farmerName,
+        date,
+        debit: amountToPay,
+        remarks: remarks,
+        userId: user._id,
+        previousBalance: previousBalance,
+      }),
+    ]).then(() => {
+      farmer.debit = farmer.debit + Number(amountToPay),
+        farmer.save()
+    }).finally(() => {
+      return res.status(200).json({ message: 'Payment successfully made' })
     })
-
-    farmer.debit = farmer.debit + Number(amountToPay);
-    await farmer.save();
-
-
-    return res.status(200).json({ message: 'Payment successfully made' })
 
   } catch (error) {
     console.log(error);

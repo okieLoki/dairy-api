@@ -20,13 +20,8 @@ server.use(express.static('public'))
 
 // Template engine
 server.set('views', path.join(__dirname, '/views'))
-server.set('view engine', 'ejs'); // Set EJS as the template engine
+server.set('view engine', 'ejs');
 
-server.get('/fp', (req, res) => {
-    res.render('forgotPassword', {
-        title: 'Forgot Password Page'
-    })
-})
 
 server.use('/api/user', userRoute)
 server.use('/api/admin', adminRoute)

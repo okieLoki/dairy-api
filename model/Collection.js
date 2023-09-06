@@ -3,9 +3,8 @@ const mongoose = require('mongoose')
 const collectionSchema = new mongoose.Schema(
   {
     farmerId: {
-      type: String,
-      required: [true, "Farmer ID missing"],
-      ref: "Farmer",
+        type: Number,
+        required: [true, 'Farmer ID missing']
     },
     farmerName: {
       type: String,
