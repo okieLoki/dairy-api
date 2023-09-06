@@ -188,7 +188,7 @@ const getAllCollectionsForDate = async (req, res) => {
                     }
                 }
             ]
-        }).sort({ collectionDate: -1 });
+        }).sort({ collectionDate: -1 , createdAt: -1});
         res.status(200).json(collections);
     } catch (error) {
         console.log(error);
