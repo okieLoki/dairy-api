@@ -5,6 +5,10 @@ const farmerSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'Farmer ID missing'],
     },
+    farmerName: {
+        type: String,
+        required: [true, 'Farmer name is missing']
+    },
     mobileNumber: {
         type: Number,
         required: [true, 'Mobile Number missing'],

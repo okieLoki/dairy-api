@@ -136,17 +136,13 @@ const sendForgotPasswordMail = async (req, res) => {
             }
         );
 
-        // Store the reset password token in the user object
         user.resetPasswordToken = token;
         user.resetPasswordTokenExpires = Date.now() + 30 * 60 * 1000; // 30 minutes
 
-        // Save the user with the reset password token
         await user.save();
 
-        // Construct the reset password URL
         const resetPasswordURL = `${process.env.BASE_URL}/api/admin/reset-password/${token}`;
 
-        // Send an email with the reset password URL
         await sendEmail(user, resetPasswordURL);
 
         return res.status(200).json({
@@ -214,7 +210,6 @@ const changePassword = async (req, res) => {
         user.resetPasswordToken = undefined;
         user.resetPasswordTokenExpires = undefined;
 
-        // Save the updated user object
         await user.save();
 
         return res.status(200).json({

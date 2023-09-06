@@ -4,6 +4,10 @@ const paymentSchema = new mongoose.Schema({
         type: Number,
         required: [true, 'Farmer ID is missing']
     },
+    farmerName: {
+        type: String,
+        required: [true, 'Farmer name is missing']
+    },
     date: {
         type: Date,
         required: [true, 'Date is missing']
