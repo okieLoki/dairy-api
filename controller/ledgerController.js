@@ -20,11 +20,7 @@ const getAllLedgerEntriesForRangeByAdmin = async (req, res) => {
 
         // Set the time part of the dates to midnight (00:00:00) to compare just the date part
         formattedStartDate.setHours(0, 0, 0, 0);
-        formattedEndDate.setHours(0, 0, 0, 0);
-
-        // Adjust the end date to the start of the next day minus one millisecond
-        formattedEndDate.setDate(formattedEndDate.getDate() + 1);
-        formattedEndDate.setTime(formattedEndDate.getTime() - 1);
+        formattedEndDate.setHours(23, 59, 59, 59);
 
         const ledgerEntries = await Ledger.find({
             $and: [
@@ -65,11 +61,7 @@ const getAllLedgerEntriesForRange = async (req, res) => {
 
         // Set the time part of the dates to midnight (00:00:00) to compare just the date part
         formattedStartDate.setHours(0, 0, 0, 0);
-        formattedEndDate.setHours(0, 0, 0, 0);
-
-        // Adjust the end date to the start of the next day minus one millisecond
-        formattedEndDate.setDate(formattedEndDate.getDate() + 1);
-        formattedEndDate.setTime(formattedEndDate.getTime() - 1);
+        formattedEndDate.setHours(23, 59, 59, 59);
 
         const user = await User.findOne({ username });
 
