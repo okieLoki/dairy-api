@@ -38,10 +38,6 @@ const collectionSchema = new mongoose.Schema(
       type: Number,
       required: [true, "Amount missing"],
     },
-    shift: {
-      type: String,
-      enum: ["Morning", "Evening"],
-    },
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       required: true,

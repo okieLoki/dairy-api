@@ -553,5 +553,44 @@ const getAverageSNFByUser = async (req, res) => {
     }
 };
 
+const getAllCollectionsForUser = async (req, res) => {
+    try {
+        const {username} = req.params
+        const { startDate, endDate, shift } = req.query;
+        const formattedStartDate = new Date(startDate);
+        const formattedEndDate = new Date(endDate);
 
-module.exports = { addCollection, getAllCollectionsForDate, getTotalMilkByAdmin, getTotalMilkByUser, getAverageFatByAdmin, getAverageFatByUser, getAverageSNFByAdmin, getAverageSNFByUser, updateCollection, getCollectionById }
+        if (isNaN(formattedStartDate) || isNaN(formattedEndDate)) {
+            return res.status(400).json({ message: 'Invalid date format' });
+        }
+
+        formattedStartDate.setHours(0, 0, 0, 0);
+        formattedEndDate.setHours(23, 59, 59, 59);
+
+        const user = await User.findOne({username})
+        if (!user)
+        {
+            return res.status(404).json({message: 'User not found'})
+        }
+
+        const collections = await Collection.find({
+            userId: user._id,
+            shift: shift,
+            collectionDate: {
+                $gte: formattedStartDate,
+                $lte: formattedEndDate
+            },
+        }).sort({ collectionDate: 1, createdAt: 1 });
+
+        return res.status(200).json(collections)
+    }
+    catch(error)
+    {
+        console.log(error)
+        res.status(500).json({
+            error: 'An error occurred while processing the request',
+        })
+    }
+}
+
+module.exports = { addCollection, getAllCollectionsForDate, getAllCollectionsForUser, getTotalMilkByAdmin, getTotalMilkByUser, getAverageFatByAdmin, getAverageFatByUser, getAverageSNFByAdmin, getAverageSNFByUser, updateCollection, getCollectionById }
