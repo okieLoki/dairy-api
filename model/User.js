@@ -42,7 +42,10 @@ const userSchema = new mongoose.Schema({
     token: {
         type: String
     },
-})
+}, {
+    timestamps: true
+}
+)
 
 userSchema.index({ userId: 1, adminId: 1 }, { unique: true });
 

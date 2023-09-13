@@ -38,6 +38,8 @@ const adminSchema = new mongoose.Schema({
     token: {
         type: String,
     }
+}, {
+    timestamps: true
 })
 
 const Admin = mongoose.model('Admin', adminSchema)
