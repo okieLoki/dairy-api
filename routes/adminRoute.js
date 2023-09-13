@@ -5,10 +5,10 @@ const { register, login, sendForgotPasswordMail, changePassword, renderForgotPas
 const { getAllLedgerEntriesForRangeByAdmin } = require('../controller/ledgerController');
 const { addRateList, getRate, deleteRateList, updateRateListById, getRateListById, getAllRateListByAdmin } = require('../controller/ratelistController');
 const { deleteFarmer, addFarmerAsAdmin, getAllFarmers, updateFarmerById, getFarmerById, getLatestFarmerIdByAdmin } = require('../controller/farmerController');
-const { settlePaymentByAdmin, getPaymentByAdmin } = require('../controller/paymentController');
+const { settlePaymentByAdmin, getPaymentByAdmin, editPayment, deletePayment } = require('../controller/paymentController');
 const { getAllDuesByAdmin, getPreviousDues } = require('../controller/duesController');
 const { authAdmin } = require('../middleware/auth');
-const { addCollection, getAllCollectionsForDate, getAverageFatByAdmin, getAverageSNFByAdmin, getTotalMilkByAdmin, updateCollection, getCollectionById } = require('../controller/collectionController');
+const { addCollection, getAllCollectionsForDate, getAverageFatByAdmin, getAverageSNFByAdmin, getTotalMilkByAdmin, updateCollection, getCollectionById, deleteCollection } = require('../controller/collectionController');
 const { getBillDetails, addBillDetails, updateBillDetails } = require('../controller/billController');
 
 // AUTHENTICATION 
@@ -42,12 +42,15 @@ router.get('/:username/ledger', authAdmin, getAllLedgerEntriesForRangeByAdmin)
 // PAYMENT ROUTING
 router.post('/:username/payment', authAdmin, settlePaymentByAdmin)
 router.get('/:username/payment', authAdmin, getPaymentByAdmin)
+router.put('/:username/payment/:id', authAdmin, editPayment)
+router.delete('/:username/payment/:id', authAdmin, deletePayment)
 
 // COLLECTION ROUTING
 router.post('/:username/collection', authAdmin, addCollection)
 router.get('/:username/collection', authAdmin, getAllCollectionsForDate)
 router.put('/:username/collection/:id', authAdmin, updateCollection)
 router.get('/:username/collection/:id', authAdmin, getCollectionById)
+router.delete('/:username/collection/:id', authAdmin, deleteCollection)
 router.get('/collection/totalmilk', authAdmin, getTotalMilkByAdmin)
 router.get('/collection/avgfat', authAdmin, getAverageFatByAdmin)
 router.get('/collection/avgsnf', authAdmin, getAverageSNFByAdmin)

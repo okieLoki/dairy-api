@@ -608,5 +608,6 @@ module.exports = {
     getAverageSNFByAdmin,
     getAverageSNFByUser,
     updateCollection,
-    getCollectionById
+    getCollectionById,
+    deleteCollection
 }
