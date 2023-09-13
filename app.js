@@ -9,6 +9,12 @@ const adminRoute = require('./routes/adminRoute')
 // Database connection
 dbConnect()
 
+try{
+  dbConnect()
+}catch(err){
+  console.log('Error while connecting to the DB')
+}
+
 const server = express()
 
 // Cors

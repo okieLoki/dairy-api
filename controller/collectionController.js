@@ -156,6 +156,50 @@ const updateCollection = async (req, res) => {
     }
 }
 
+const deleteCollection = async (req, res) => {
+    try {
+        const { id, username } = req.params;
+
+        const user = await User.findOne({ username });
+
+        if (!user) {
+            return res.status(404).send({ message: 'No user found' });
+        }
+
+        const farmer = await Farmer.findOne({ userId: user._id, farmerId });
+
+        if (!farmer) {
+            return res.status(400).json({
+                status: 'Invalid Farmer ID or The Farmer does not belong to the User',
+            });
+        }
+
+        const collection = await Collection.findById(id);
+
+        if (!collection) {
+            return res.status(404).json({ message: 'Collection not found' });
+        }
+
+        await Collection.findByIdAndDelete(id);
+
+        const ledger = await Ledger.findOne({ collectionId: id });
+        if (ledger) {
+            await Ledger.findByIdAndDelete(ledger._id);
+        }
+
+        farmer.credit = (farmer.credit - Number(collection.amount)).toFixed(2);
+        await farmer.save();
+
+        return res.status(200).json('Collection deleted successfully');
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            error: 'An error occurred while processing the request',
+        });
+    }
+};
+
+
 
 const getAllCollectionsForDate = async (req, res) => {
     try {
@@ -336,7 +380,7 @@ const getAverageFatByAdmin = async (req, res) => {
         ]);
 
         if (totalFat.length === 0 || totalMilk.length === 0) return 0
-    
+
         averageFat = (totalFat[0].totalFat / totalMilk[0].totalMilk).toFixed(2);
 
         res.status(200).json(averageFat);
@@ -554,4 +598,15 @@ const getAverageSNFByUser = async (req, res) => {
 };
 
 
-module.exports = { addCollection, getAllCollectionsForDate, getTotalMilkByAdmin, getTotalMilkByUser, getAverageFatByAdmin, getAverageFatByUser, getAverageSNFByAdmin, getAverageSNFByUser, updateCollection, getCollectionById }
+module.exports = {
+    addCollection,
+    getAllCollectionsForDate,
+    getTotalMilkByAdmin,
+    getTotalMilkByUser,
+    getAverageFatByAdmin,
+    getAverageFatByUser,
+    getAverageSNFByAdmin,
+    getAverageSNFByUser,
+    updateCollection,
+    getCollectionById
+}

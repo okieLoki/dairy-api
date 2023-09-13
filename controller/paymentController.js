@@ -173,4 +173,94 @@ const getPaymentByAdmin = async (req, res) => {
   }
 }
 
-module.exports = { settlePaymentByAdmin, settlePaymentByUser, getPaymentByAdmin };
+const editPayment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { amountToPay, remarks } = req.body;
+
+    const payment = await Payment.findById(id);
+
+    if (!payment) {
+      return res.status(404).json(
+        {
+          message: 'Payment not found'
+        }
+      );
+    }
+
+    const previousAmount = payment.amountToPay;
+
+    payment.amountToPay = amountToPay || payment.amountToPay;
+    payment.remarks = remarks || payment.remarks;
+    await payment.save();
+
+    const ledger = await Ledger.findOne({
+      farmerId: payment.farmerId,
+      date: payment.date
+    });
+
+    if (ledger) {
+      ledger.debit = (ledger.debit - previousAmount + payment.amountToPay).toFixed(2);
+      ledger.remarks = remarks || ledger.remarks;
+      await ledger.save();
+    }
+
+    return res.status(200).json('Payment updated successfully');
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: 'An error occurred while processing the request',
+    });
+  }
+};
+
+const deletePayment = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const payment = await Payment.findById(id);
+
+    if (!payment) {
+      return res.status(404).json({ message: 'Payment not found' });
+    }
+
+    const paymentAmount = payment.amountToPay;
+
+    await Payment.findByIdAndDelete(id);
+
+
+    const ledger = await Ledger.findOne({
+      farmerId: payment.farmerId, date: payment.date
+    });
+
+    if (ledger) {
+      await Ledger.findByIdAndDelete(ledger._id);
+    }
+
+    const farmer = await Farmer.findOne(
+      {
+        farmerId: payment.farmerId
+      });
+
+    if (farmer) {
+      farmer.debit = (farmer.debit - paymentAmount).toFixed(2);
+      await farmer.save();
+    }
+
+    return res.status(200).json('Payment deleted successfully');
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({
+      error: 'An error occurred while processing the request',
+    });
+  }
+};
+
+
+module.exports = {
+  settlePaymentByAdmin,
+  settlePaymentByUser,
+  getPaymentByAdmin,
+  editPayment,
+  deletePayment
+};
