@@ -161,7 +161,7 @@ const getPaymentByAdmin = async (req, res) => {
           },
         },
       ],
-    }).sort({ date: -1 });
+    }).sort({ date: -1, createdAt: -1});
 
     res.status(200).json(payments);
   }

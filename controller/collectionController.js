@@ -1,6 +1,7 @@
 const Collection = require('../model/Collection')
 const Farmer = require('../model/Farmer');
 const Ledger = require('../model/Ledger');
+const Report = require('../model/Report');
 const User = require('../model/User')
 const jwt = require('jsonwebtoken')
 
@@ -62,6 +63,53 @@ const addCollection = async (req, res) => {
 
         farmer.credit = (farmer.credit + Number(amount)).toFixed(2);
         await farmer.save();
+
+        // add to report
+        const report = await Report.findOne({
+            username: user.username,
+            shift: shift,
+            date: collectionDate
+        });
+
+        if (!report) {
+            let tempMilk = 0, tempFat = 0, tempSNF = 0;
+            if (fat !== 0 && snf !== 0) {
+                tempMilk = qty;
+                tempFat = fat * qty;
+                tempSNF = snf * qty;
+            }
+            await Report.create({
+                userId: user.userId,
+                username: username,
+                contactPerson: user.contactPerson,
+                date: collectionDate,
+                shift: shift,
+                totalMilk: qty,
+                avgFat: fat,
+                avgSNF: snf,
+                totalAmount: amount,
+                tempMilk: tempMilk,
+                tempFat: tempFat,
+                tempSNF: tempSNF,
+                adminId: user.adminId
+            });
+        } else {
+            let tempMilk = 0, tempFat = 0, tempSNF = 0;
+            report.totalMilk = report.totalMilk + Number(qty);
+            report.totalAmount = report.totalAmount + Number(amount);
+            if (fat !== 0 && snf !== 0) {
+                tempMilk = report.tempMilk + Number(qty);
+                tempFat = report.tempFat + Number(fat * qty);
+                tempSNF = report.tempSNF + Number(snf * qty);
+
+                report.avgFat = (tempFat / tempMilk).toFixed(2);
+                report.avgSNF = (tempSNF / tempMilk).toFixed(2);
+                report.tempFat = tempFat;
+                report.tempSNF = tempSNF;
+                report.tempMilk = tempMilk;
+            }
+            await report.save();
+        }
 
         return res.status(201).json('Collection added successfully');
     } catch (error) {
@@ -232,7 +280,7 @@ const getAllCollectionsForDate = async (req, res) => {
                     }
                 }
             ]
-        }).sort({ collectionDate: -1 });
+        }).sort({ collectionDate: -1 , createdAt: -1});
         res.status(200).json(collections);
     } catch (error) {
         console.log(error);
@@ -597,17 +645,81 @@ const getAverageSNFByUser = async (req, res) => {
     }
 };
 
+const getAllCollectionsForUser = async (req, res) => {
+    try {
+        const {username} = req.params
+        const { startDate, endDate, shift } = req.query;
+        const formattedStartDate = new Date(startDate);
+        const formattedEndDate = new Date(endDate);
 
-module.exports = {
-    addCollection,
-    getAllCollectionsForDate,
-    getTotalMilkByAdmin,
-    getTotalMilkByUser,
-    getAverageFatByAdmin,
-    getAverageFatByUser,
-    getAverageSNFByAdmin,
-    getAverageSNFByUser,
-    updateCollection,
-    getCollectionById,
-    deleteCollection
+        if (isNaN(formattedStartDate) || isNaN(formattedEndDate)) {
+            return res.status(400).json({ message: 'Invalid date format' });
+        }
+
+        formattedStartDate.setHours(0, 0, 0, 0);
+        formattedEndDate.setHours(23, 59, 59, 59);
+
+        const user = await User.findOne({username})
+        if (!user)
+        {
+            return res.status(404).json({message: 'User not found'})
+        }
+
+        const collections = await Collection.find({
+            userId: user._id,
+            shift: shift !== "Both" ? shift : { $exists: true },
+            collectionDate: {
+                $gte: formattedStartDate,
+                $lte: formattedEndDate,
+            },
+        })
+        .sort({ collectionDate: 1, createdAt: 1 })
+
+        return res.status(200).json(collections)
+    }
+    catch(error)
+    {
+        console.log(error)
+        res.status(500).json({
+            error: 'An error occurred while processing the request',
+        })
+    }
 }
+
+const getAllCollectionsForAdmin = async (req, res) => {
+    try {
+        const { startDate, endDate, shift } = req.query;
+        const formattedStartDate = new Date(startDate);
+        const formattedEndDate = new Date(endDate);
+        const token = req.headers.authorization.split(' ')[1];
+        const admin_id = jwt.decode(token).admin_id;
+
+        if (isNaN(formattedStartDate) || isNaN(formattedEndDate)) {
+            return res.status(400).json({ message: 'Invalid date format' });
+        }
+
+        formattedStartDate.setHours(0, 0, 0, 0);
+        formattedEndDate.setHours(23, 59, 59, 59);
+
+        const collections = await Report.find({
+            adminId: admin_id,
+            shift: shift !== "Both" ? shift : { $exists: true },
+            date: {
+                $gte: formattedStartDate,
+                $lte: formattedEndDate,
+            },
+        })
+        .sort({ date: 1})
+
+        return res.status(200).json(collections)
+    }
+    catch(error)
+    {
+        console.log(error)
+        res.status(500).json({
+            error: 'An error occurred while processing the request',
+        })
+    }
+}
+
+module.exports = { addCollection, getAllCollectionsForDate, getAllCollectionsForUser, getAllCollectionsForAdmin, getTotalMilkByAdmin, getTotalMilkByUser, getAverageFatByAdmin, getAverageFatByUser, getAverageSNFByAdmin, getAverageSNFByUser, updateCollection, getCollectionById, deleteCollection }
