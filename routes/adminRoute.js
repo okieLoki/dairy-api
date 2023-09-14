@@ -8,7 +8,7 @@ const { deleteFarmer, addFarmerAsAdmin, getAllFarmers, updateFarmerById, getFarm
 const { settlePaymentByAdmin, getPaymentByAdmin } = require('../controller/paymentController');
 const { getAllDuesByAdmin, getPreviousDues } = require('../controller/duesController');
 const { authAdmin } = require('../middleware/auth');
-const { addCollection, getAllCollectionsForDate, getAverageFatByAdmin, getAverageSNFByAdmin, getTotalMilkByAdmin, updateCollection, getCollectionById } = require('../controller/collectionController');
+const { addCollection, getAllCollectionsForDate, getAverageFatByAdmin, getAverageSNFByAdmin, getTotalMilkByAdmin, updateCollection, getCollectionById, getAllCollectionsForAdmin } = require('../controller/collectionController');
 const { getBillDetails, addBillDetails, updateBillDetails } = require('../controller/billController');
 
 // AUTHENTICATION 
@@ -48,6 +48,7 @@ router.post('/:username/collection', authAdmin, addCollection)
 router.get('/:username/collection', authAdmin, getAllCollectionsForDate)
 router.put('/:username/collection/:id', authAdmin, updateCollection)
 router.get('/:username/collection/:id', authAdmin, getCollectionById)
+router.get('/collection/report', authAdmin, getAllCollectionsForAdmin)
 router.get('/collection/totalmilk', authAdmin, getTotalMilkByAdmin)
 router.get('/collection/avgfat', authAdmin, getAverageFatByAdmin)
 router.get('/collection/avgsnf', authAdmin, getAverageSNFByAdmin)
@@ -55,11 +56,11 @@ router.get('/collection/avgsnf', authAdmin, getAverageSNFByAdmin)
 // DUES ROUTING
 router.get('/:username/dues', authAdmin, getAllDuesByAdmin)
 router.get('/:username/dues/:farmerId/prev', authAdmin, getPreviousDues)
+// TODO : Update previous dues after the edit is done on a particular day
 
 // BILL DETAILS
 router.get('/bill', authAdmin, getBillDetails)
 router.put('/bill', authAdmin, updateBillDetails)
 router.post('/bill', authAdmin, addBillDetails)
-
 
 module.exports = router;
