@@ -81,6 +81,7 @@ const addCollection = async (req, res) => {
             await Report.create({
                 userId: user.userId,
                 username: username,
+                contactPerson: user.contactPerson,
                 date: collectionDate,
                 shift: shift,
                 totalMilk: qty,

@@ -9,6 +9,10 @@ const reportSchema = new mongoose.Schema({
         type: String,
         required: [true, 'User name missing']
     },
+    contactPerson: {
+        type: String,
+        required: [true, 'Contact person missing']
+    },
     date: {
         type: Date,
         required: [true, 'Date missing']
