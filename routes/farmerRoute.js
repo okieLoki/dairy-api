@@ -6,9 +6,7 @@ const {
     reqOTPFarmer, 
     verifyOTPandLogin,
     getFarmerCollections,
-    getCollectionsDaily,
-    getCollectionsWeekly,
-    getCollectionsMonthly
+    getFarmerLedger
 } = require('../controller/farmerAppController')
 
 router.post('/otp', reqOTPFarmer)
@@ -16,8 +14,6 @@ router.post('/otp', reqOTPFarmer)
 router.use(authFarmer)
 router.patch('/otp/verify', verifyOTPandLogin)
 router.get('/collections', getFarmerCollections)
-router.get('/collections/daily', getCollectionsDaily)
-router.get('/collections/weekly', getCollectionsWeekly)
-router.get('/collections/monthly', getCollectionsMonthly)
+router.get('/ledger', getFarmerLedger)
 
 module.exports = router;

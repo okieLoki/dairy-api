@@ -4,6 +4,7 @@ const { sendOTP, generateOTP } = require('../service/otpService')
 const jwt = require('jsonwebtoken')
 const Farmer = require('../model/Farmer')
 const Collection = require('../model/Collection')
+const Ledger = require('../model/Ledger')
 
 // Controller functions for farmer app
 const reqOTPFarmer = async (req, res) => {
@@ -97,36 +98,8 @@ const verifyOTPandLogin = async (req, res) => {
         handleErrors(error, res);
     }
 };
-
 const getFarmerCollections = async (req, res) => {
     try {
-
-        const farmer_id = req.farmer._id
-
-        // check if verified
-        const farmer = await Farmer.findById(farmer_id)
-        if (!farmer.verified) throw createError.BadRequest('Farmer not verified')
-
-        const collections = await Collection.find({
-            farmerId: farmer.farmerId,
-            userId: farmer.userId
-        })
-
-        if (!collections) throw createError.NotFound('No collections found')
-
-        return res.status(200).json({
-            message: 'Collections fetched successfully',
-            collections
-        })
-
-
-    } catch (error) {
-        handleErrors(error, res)
-    }
-}
-
-const getCollectionsDaily = async (req, res) => {
-    try {
         const farmer_id = req.farmer._id;
         const farmer = await Farmer.findById(farmer_id);
 
@@ -134,56 +107,51 @@ const getCollectionsDaily = async (req, res) => {
             throw createError.BadRequest('Farmer not verified');
         }
 
-        const today = new Date();
-        today.setUTCHours(0, 0, 0, 0);
+        let fromDate, toDate;
 
-        const nextDay = new Date(today);
-        nextDay.setDate(nextDay.getDate() + 1);
+        const period = req.query.period;
 
-        const collections = await Collection.find({
-            farmerId: farmer.farmerId,
-            userId: farmer.userId,
-            collectionDate: { $gte: today, $lt: nextDay }
-        });
-
-        if (collections.length === 0) {
-            throw createError.NotFound('No collections found for today');
-        }
-
-        return res.status(200).json({
-            message: 'Collections fetched successfully',
-            collections
-        });
-    } catch (error) {
-        handleErrors(error, res);
-    }
-};
-
-const getCollectionsWeekly = async (req, res) => {
-    try {
-        const farmer_id = req.farmer._id;
-        const farmer = await Farmer.findById(farmer_id);
-
-        if (!farmer.verified) {
-            throw createError.BadRequest('Farmer not verified');
+        if (!period) {
+            throw createError.BadRequest('Period should be passed as a query parameter');
         }
 
         const today = new Date();
         today.setUTCHours(0, 0, 0, 0);
 
-        const sevenDaysAgo = new Date(today);
-        sevenDaysAgo.setDate(today.getDate() - 6);
-        const endOfToday = new Date(today);
-        endOfToday.setUTCHours(23, 59, 59, 999);
+        switch (period) {
+            case 'all':
+                fromDate = new Date(0);
+                toDate = new Date();
+                break;
+            case 'daily':
+                fromDate = new Date(today);
+                toDate = new Date(today);
+                toDate.setDate(toDate.getDate() + 1);
+                break;
+            case 'weekly':
+                fromDate = new Date(today);
+                fromDate.setDate(fromDate.getDate() - 6);
+                toDate = new Date(today);
+                toDate.setUTCHours(23, 59, 59, 999);
+                break;
+            case 'monthly':
+                fromDate = new Date(today);
+                fromDate.setDate(1);
+                toDate = new Date(today);
+                toDate.setUTCMonth(toDate.getUTCMonth() + 1);
+                break;
+            default:
+                throw createError.BadRequest('Invalid period');
+        }
 
         const collections = await Collection.find({
             farmerId: farmer.farmerId,
             userId: farmer.userId,
-            collectionDate: { $gte: sevenDaysAgo, $lte: endOfToday }
+            collectionDate: { $gte: fromDate, $lte: toDate }
         });
 
         if (collections.length === 0) {
-            throw createError.NotFound('No collections found for the past 7 days');
+            throw createError.NotFound(`No collections found for the selected period: ${period}`);
         }
 
         return res.status(200).json({
@@ -197,48 +165,47 @@ const getCollectionsWeekly = async (req, res) => {
 
 
 
-
-const getCollectionsMonthly = async (req, res) => {
+const getFarmerLedger = async (req, res) => {
     try {
         const farmer_id = req.farmer._id;
         const farmer = await Farmer.findById(farmer_id);
 
         if (!farmer.verified) {
-            throw createError.BadRequest('Farmer not verified');
+            throw createError.BadRequest('Farmer Not Verified');
         }
 
-        const today = new Date();
-        today.setUTCHours(0, 0, 0, 0);
-        today.setDate(1);
+        const { startDate, endDate } = req.query;
 
-        const nextMonth = new Date(today);
-        nextMonth.setUTCMonth(nextMonth.getUTCMonth() + 1);
+        if (!startDate || !endDate) {
+            throw createError.BadRequest('Both startDate and endDate query parameters are required');
+        }
 
-        const collections = await Collection.find({
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+
+        if (startDateObj >= endDateObj) {
+            throw createError.BadRequest('startDate should be earlier than endDate');
+        }
+        const ledger = await Ledger.find({
             farmerId: farmer.farmerId,
             userId: farmer.userId,
-            collectionDate: { $gte: today, $lt: nextMonth }
+            date: { $gte: startDateObj, $lte: endDateObj }
         });
-
-        if (collections.length === 0) {
-            throw createError.NotFound('No collections found for the current month');
+        if (ledger.length === 0) {
+            throw createError.NotFound('No Ledger Found for the specified date range');
         }
 
-        return res.status(200).json({
-            message: 'Collections fetched successfully',
-            collections
-        });
+        return res.status(200).json(ledger);
     } catch (error) {
         handleErrors(error, res);
     }
 };
+
 
 
 module.exports = {
     reqOTPFarmer,
     verifyOTPandLogin,
     getFarmerCollections,
-    getCollectionsDaily,
-    getCollectionsWeekly,
-    getCollectionsMonthly
+    getFarmerLedger
 }
