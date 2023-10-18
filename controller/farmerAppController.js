@@ -150,10 +150,6 @@ const getFarmerCollections = async (req, res) => {
             collectionDate: { $gte: fromDate, $lte: toDate }
         });
 
-        if (collections.length === 0) {
-            throw createError.NotFound(`No collections found for the selected period: ${period}`);
-        }
-
         return res.status(200).json({
             message: 'Collections fetched successfully',
             collections
