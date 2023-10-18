@@ -89,8 +89,14 @@ const verifyOTPandLogin = async (req, res) => {
             return res.status(200).json({
                 message: 'OTP verified successfully',
                 token: token,
-                name: farmer.farmerName,
-                farmerID: farmer.farmerId,
+                farmer: {
+                    farmer_id: farmer._id,
+                    farmer_name: farmer.farmerName,
+                    farmerID: farmer.farmerId,
+                    mobile_number: farmer.mobileNumber,
+                    user_id: farmer.userId,
+                    verified: farmer.verified
+                }
             });
         } else {
             throw createError.InternalServerError('Internal Server Error');
