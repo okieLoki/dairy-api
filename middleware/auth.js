@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../model/User');
 const Admin = require('../model/Admin');
+const Farmer = require('../model/Farmer');
 const secretKey = process.env.SECRET_KEY;
 
 const authUser = async (req, res, next) => {
@@ -44,6 +45,26 @@ const authAdmin = async (req, res, next) => {
   }
 };
 
+const authFarmer  = async (req, res, next) => {
+  const token = req.header('Authorization').split(' ')[1];
+  if (!token) {
+    return res.status(401).json({ message: 'Access denied. Token missing.' });
+  }
+
+  try {
+    const decodedToken = jwt.verify(token, secretKey);
+    const farmer = await Farmer.findById(decodedToken.farmer_id);
+
+    if (!farmer) {
+      return res.status(401).json({ message: 'Invalid token.' });
+    }
+    req.farmer = farmer;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: 'Invalid token.' });
+  }
+}
+
 
 const auth = async (req, res, next) => {
   const token = req.header('Authorization');
@@ -84,4 +105,4 @@ const auth = async (req, res, next) => {
 };
 
 
-module.exports = { authUser, authAdmin, auth };
+module.exports = { authUser, authAdmin, auth, authFarmer };

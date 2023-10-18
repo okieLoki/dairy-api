@@ -54,6 +54,18 @@ const farmerSchema = new mongoose.Schema({
     credit: {
         type: Number,
         default: 0
+    },
+    otp: {
+        type: String,
+        required: [true, 'OTP missing']
+    },
+    otp_expiry: {
+        type: Date,
+        required: [true, 'OTP expiry missing']
+    },
+    verified : {
+        type: Boolean,
+        default: false
     }
 })
 

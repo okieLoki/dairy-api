@@ -1,29 +1,30 @@
-const Admin = require('../model/Admin');
-const jwt = require('jsonwebtoken')
-const validator = require('email-validator');
-const Bill = require('../model/Bill');
-const sendEmail = require('../service/emailService')
+const Admin = require("../model/Admin");
+const jwt = require("jsonwebtoken");
+const validator = require("email-validator");
+const Bill = require("../model/Bill");
+const sendEmail = require("../service/emailService");
 
 const register = async (req, res) => {
     try {
-        const { email, name, password, maxUsers, maxFarmers, expiryDate } = req.body;
+        const { email, name, password, maxUsers, maxFarmers, expiryDate } =
+            req.body;
 
         if (!email || !name || !password) {
             return res.status(400).json({
-                error: 'Mandatory fields are missing',
+                error: "Mandatory fields are missing",
             });
         }
         const existingAdmin = await Admin.findOne({ email: email });
 
         if (existingAdmin) {
             return res.status(409).json({
-                error: 'Admin already exists',
+                error: "Admin already exists",
             });
         }
 
         if (validator.validate(email) === false) {
             return res.status(400).json({
-                error: 'Invalid email',
+                error: "Invalid email",
             });
         }
 
@@ -35,36 +36,34 @@ const register = async (req, res) => {
             },
             process.env.SECRET_KEY,
             {
-                expiresIn: '2h'
+                expiresIn: "2h",
             }
-        )
-        admin.password = undefined
-        admin.token = token
+        );
+        admin.password = undefined;
+        admin.token = token;
 
-        const bill = await Bill.create({ adminId: admin._id })
+        const bill = await Bill.create({ adminId: admin._id });
 
-        return res.status(201).json(admin)
+        return res.status(201).json(admin);
     } catch (error) {
         console.error(error);
         return res.status(500).json({
-            error: 'An error occurred while processing the request',
+            error: "An error occurred while processing the request",
         });
     }
-}
-
+};
 
 const login = async (req, res) => {
-
     try {
-        const { email, password } = req.body
+        const { email, password } = req.body;
 
         if (!email || !password) {
             return res.status(400).json({
-                error: 'Email or Password missing'
-            })
+                error: "Email or Password missing",
+            });
         }
 
-        const admin = await Admin.findOne({ email })
+        const admin = await Admin.findOne({ email });
 
         if (admin && admin.password === password) {
             const now = new Date();
@@ -72,17 +71,17 @@ const login = async (req, res) => {
 
             if (expiryDate < now) {
                 return res.status(400).json({
-                    error: 'Subscription expired'
+                    error: "Subscription expired",
                 });
             }
 
             const token = jwt.sign(
                 {
-                    admin_id: admin._id
+                    admin_id: admin._id,
                 },
                 process.env.SECRET_KEY,
                 {
-                    expiresIn: Math.floor((expiryDate - now) / 1000) // Calculate expiresIn in seconds
+                    expiresIn: Math.floor((expiryDate - now) / 1000), // Calculate expiresIn in seconds
                 }
             );
 
@@ -91,28 +90,26 @@ const login = async (req, res) => {
 
             return res.status(200).json({
                 ...admin.toObject(),
-                expiryDate: expiryDate
+                expiryDate: expiryDate,
             });
-
         }
         return res.status(400).json({
-            status: 'Email or token is incorrect'
-        })
+            status: "Email or token is incorrect",
+        });
     } catch (error) {
         console.error(error);
         return res.status(500).json({
-            error: 'An error occurred while processing the request',
+            error: "An error occurred while processing the request",
         });
     }
-
-}
+};
 
 const sendForgotPasswordMail = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
         return res.status(400).json({
-            error: 'Email missing',
+            error: "Email missing",
         });
     }
 
@@ -121,7 +118,7 @@ const sendForgotPasswordMail = async (req, res) => {
 
         if (!user) {
             return res.status(400).json({
-                error: 'User not found',
+                error: "User not found",
             });
         }
 
@@ -132,7 +129,7 @@ const sendForgotPasswordMail = async (req, res) => {
             },
             process.env.SECRET_KEY,
             {
-                expiresIn: '30m',
+                expiresIn: "30m",
             }
         );
 
@@ -146,12 +143,12 @@ const sendForgotPasswordMail = async (req, res) => {
         await sendEmail(user, resetPasswordURL);
 
         return res.status(200).json({
-            message: 'Email sent successfully',
+            message: "Email sent successfully",
         });
     } catch (error) {
         console.error(error);
         return res.status(500).json({
-            error: 'An error occurred while processing the request',
+            error: "An error occurred while processing the request",
         });
     }
 };
@@ -161,27 +158,27 @@ const renderForgotPasswordPage = async (req, res) => {
 
     if (!token) {
         return res.status(400).json({
-            status: 'Missing Token',
+            status: "Missing Token",
         });
     }
 
     try {
         const user = await Admin.findOne({
             resetPasswordToken: token,
-            resetPasswordTokenExpires: { $gt: Date.now() }, 
+            resetPasswordTokenExpires: { $gt: Date.now() },
         });
 
         if (!user) {
-            return res.status(500).render('errorPage')
+            return res.status(500).render("errorPage");
         }
 
-        res.render('forgotPassword', {
-            title: 'Forgot Password Page',
+        res.render("forgotPassword", {
+            title: "Forgot Password Page",
             token,
         });
     } catch (error) {
         console.error(error);
-        return res.status(500).render('errorPage')
+        return res.status(500).render("errorPage");
     }
 };
 
@@ -190,19 +187,19 @@ const changePassword = async (req, res) => {
 
     if (!token) {
         return res.status(400).json({
-            status: 'Missing Token',
+            status: "Missing Token",
         });
     }
 
     try {
         const user = await Admin.findOne({
             resetPasswordToken: token,
-            resetPasswordTokenExpires: { $gt: Date.now() }, 
+            resetPasswordTokenExpires: { $gt: Date.now() },
         });
 
         if (!user) {
             return res.status(400).json({
-                status: 'Invalid or expired token',
+                status: "Invalid or expired token",
             });
         }
 
@@ -213,12 +210,12 @@ const changePassword = async (req, res) => {
         await user.save();
 
         return res.status(200).json({
-            status: 'Password Changed',
+            status: "Password Changed",
         });
     } catch (error) {
         console.error(error);
         return res.status(500).json({
-            error: 'An error occurred while processing the request',
+            error: "An error occurred while processing the request",
         });
     }
 };

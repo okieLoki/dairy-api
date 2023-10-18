@@ -380,4 +380,13 @@ const getRate = async (req, res) => {
     }
 };
 
-module.exports = { addRateList, addRateListByUser, getAllRateListByAdmin, getAllRateListByUser, getRateListById, updateRateListById, deleteRateList, getRate };
+module.exports = {
+    addRateList,
+    addRateListByUser,
+    getAllRateListByAdmin,
+    getAllRateListByUser,
+    getRateListById,
+    updateRateListById,
+    deleteRateList,
+    getRate
+};

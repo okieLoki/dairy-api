@@ -286,4 +286,5 @@ const getLatestFarmerIdByUser = async (req, res) => {
 }
 
 
-module.exports = { addFarmerAsAdmin, addFarmerAsUser, deleteFarmer, getAllFarmers, getFarmerById, updateFarmerById, getLatestFarmerIdByAdmin, getLatestFarmerIdByUser }
+
+module.exports = { addFarmerAsAdmin, addFarmerAsUser, deleteFarmer, getAllFarmers, getFarmerById, updateFarmerById, getLatestFarmerIdByAdmin, getLatestFarmerIdByUser}

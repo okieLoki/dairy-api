@@ -5,6 +5,7 @@ const cors = require('cors')
 const path = require('path')
 const userRoute = require('./routes/userRoute')
 const adminRoute = require('./routes/adminRoute')
+const farmerRoute = require('./routes/farmerRoute')
 
 // Database connection
 dbConnect()
@@ -12,7 +13,7 @@ dbConnect()
 try{
   dbConnect()
 }catch(err){
-  console.log('Error while connecting to the DB')
+  console.log('Error while connecting to the DB')
 }
 
 const server = express()
@@ -31,5 +32,6 @@ server.set('view engine', 'ejs');
 
 server.use('/api/user', userRoute)
 server.use('/api/admin', adminRoute)
+server.use('/api/farmer', farmerRoute)
 
 module.exports = server
