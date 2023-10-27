@@ -17,7 +17,7 @@ const reqOTPFarmer = async (req, res) => {
         }
 
         const farmer = await Farmer.findOne({
-            mobileNumber, 
+            mobileNumber,
             farmerId: id
         })
 
@@ -92,6 +92,8 @@ const verifyOTPandLogin = async (req, res) => {
                     expiresIn: '20h'
                 });
 
+            const user = await User.findById(farmer.userId);
+
             return res.status(200).json({
                 message: 'OTP verified successfully',
                 token: token,
@@ -100,7 +102,12 @@ const verifyOTPandLogin = async (req, res) => {
                     farmer_name: farmer.farmerName,
                     farmerID: farmer.farmerId,
                     mobile_number: farmer.mobileNumber,
-                    user_id: farmer.userId,
+                    admin : {
+                        admin_name: user.username,
+                        contact_person: user.contactPerson,
+                        address: user.address,
+                        contact_number: user.mobileNo
+                    },
                     verified: farmer.verified
                 }
             });
