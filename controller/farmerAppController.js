@@ -3,17 +3,23 @@ const handleErrors = require('../utils/handleErrors')
 const { sendOTP, generateOTP } = require('../service/otpService')
 const jwt = require('jsonwebtoken')
 const Farmer = require('../model/Farmer')
+const User = require('../model/User')
 const Collection = require('../model/Collection')
 const Ledger = require('../model/Ledger')
 
 // Controller functions for farmer app
 const reqOTPFarmer = async (req, res) => {
     try {
-        const { mobileNumber } = req.body
+        const { id, mobileNumber } = req.body
 
-        if (!mobileNumber) throw createError.BadRequest('Mobile number is required')
+        if (!mobileNumber || !id) {
+            throw createError.BadRequest('Mobile number or id is missing')
+        }
 
-        const farmer = await Farmer.findOne({ mobileNumber })
+        const farmer = await Farmer.findOne({
+            mobileNumber, 
+            farmerId: id
+        })
 
         if (!farmer) throw createError.NotFound(`Farmer with mobile number ${mobileNumber} does not exist`)
 
@@ -105,6 +111,8 @@ const verifyOTPandLogin = async (req, res) => {
         handleErrors(error, res);
     }
 };
+
+
 const getFarmerCollections = async (req, res) => {
     try {
         const farmer_id = req.farmer._id;

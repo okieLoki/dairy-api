@@ -6,7 +6,7 @@ const {
     reqOTPFarmer, 
     verifyOTPandLogin,
     getFarmerCollections,
-    getFarmerLedger
+    getFarmerLedger,
 } = require('../controller/farmerAppController')
 
 router.post('/otp', reqOTPFarmer)
