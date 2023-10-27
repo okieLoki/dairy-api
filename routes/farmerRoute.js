@@ -7,12 +7,16 @@ const {
     verifyOTPandLogin,
     getFarmerCollections,
     getFarmerLedger,
+    listProfiles,
+    selectProfile
 } = require('../controller/farmerAppController')
 
 router.post('/otp', reqOTPFarmer)
 
 router.use(authFarmer)
 router.patch('/otp/verify', verifyOTPandLogin)
+router.get('/profiles', listProfiles)
+router.patch('/profile/:id', selectProfile)
 router.get('/collections', getFarmerCollections)
 router.get('/ledger', getFarmerLedger)
 

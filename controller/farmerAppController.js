@@ -10,16 +10,13 @@ const Ledger = require('../model/Ledger')
 // Controller functions for farmer app
 const reqOTPFarmer = async (req, res) => {
     try {
-        const { id, mobileNumber } = req.body
+        const { mobileNumber } = req.body
 
-        if (!mobileNumber || !id) {
-            throw createError.BadRequest('Mobile number or id is missing')
+        if (!mobileNumber) {
+            throw createError.BadRequest('Mobile number is missing')
         }
 
-        const farmer = await Farmer.findOne({
-            mobileNumber,
-            farmerId: id
-        })
+        const farmer = await Farmer.findOne({ mobileNumber })
 
         if (!farmer) throw createError.NotFound(`Farmer with mobile number ${mobileNumber} does not exist`)
 
@@ -35,11 +32,7 @@ const reqOTPFarmer = async (req, res) => {
 
             const token = jwt.sign({
                 farmer_id: farmer._id,
-                farmer_name: farmer.farmerName,
-                farmerID: farmer.farmerId,
                 mobile_number: farmer.mobileNumber,
-                user_id: farmer.userId,
-                verified: farmer.verified
             },
                 process.env.SECRET_KEY,
                 {
@@ -82,33 +75,19 @@ const verifyOTPandLogin = async (req, res) => {
 
             const token = jwt.sign({
                 farmer_id: farmer._id,
-                farmerID: farmer.farmerId,
                 mobile_number: farmer.mobileNumber,
-                user_id: farmer.userId,
-                verified: farmer.verified
             },
                 process.env.SECRET_KEY,
                 {
                     expiresIn: '20h'
                 });
 
-            const user = await User.findById(farmer.userId);
-
             return res.status(200).json({
                 message: 'OTP verified successfully',
                 token: token,
                 farmer: {
                     farmer_id: farmer._id,
-                    farmer_name: farmer.farmerName,
-                    farmerID: farmer.farmerId,
                     mobile_number: farmer.mobileNumber,
-                    admin : {
-                        admin_name: user.username,
-                        contact_person: user.contactPerson,
-                        address: user.address,
-                        contact_number: user.mobileNo
-                    },
-                    verified: farmer.verified
                 }
             });
         } else {
@@ -118,6 +97,74 @@ const verifyOTPandLogin = async (req, res) => {
         handleErrors(error, res);
     }
 };
+
+const listProfiles = async (req, res) => {
+    try {
+
+        const farmer = req.farmer
+
+        if (!farmer) throw createError.NotFound('Farmer not found')
+
+        if (!farmer.verified) throw createError.BadRequest('Farmer not verified')
+
+        const farmersWithMobile = await Farmer.find({ mobileNumber: farmer.mobileNumber })
+            .populate('userId')
+
+        return res.status(200).json({
+            message: 'Farmer fetched successfully',
+            farmersWithMobile
+        });
+
+
+    } catch (error) {
+        handleErrors(error, res);
+    }
+}
+
+const selectProfile = async (req, res) => {
+    try {
+
+        const farmer_id = req.params.id
+
+        if (!farmer_id) throw createError.BadRequest('Farmer Id is missing')
+
+        const farmer = await Farmer.findById(farmer_id).populate('userId')
+
+        if (!farmer) throw createError.NotFound('Farmer not found')
+
+        if (!farmer.verified) throw createError.BadRequest('Farmer not verified')
+
+        const token = jwt.sign({
+            farmer_name: farmer.name,
+            farmer_id: farmer._id
+        },
+            process.env.SECRET_KEY,
+            {
+                expiresIn: '20h'
+            });
+
+        return res.status(200).json({
+            message: 'Farmer fetched successfully',
+            token: token,
+            farmer: {
+                farmer_name: farmer.farmerName,
+                mobile_number: farmer.mobileNumber,
+                farmerId: farmer.farmerId,
+                farmerLevel: farmer.farmerLevel,
+                admin: {
+                    admin_username: farmer.userId.username,
+                    admin_mobile_number: farmer.userId.mobileNo,
+                    admin_contact_person: farmer.userId.contactPerson,
+                }
+            }
+        });
+
+    } catch (error) {
+
+        handleErrors(error, res);
+
+    }
+}
 
 
 const getFarmerCollections = async (req, res) => {
@@ -213,7 +260,15 @@ const getFarmerLedger = async (req, res) => {
             throw createError.NotFound('No Ledger Found for the specified date range');
         }
 
-        return res.status(200).json(ledger);
+        const balance = ledger.reduce((prev, curr) => {
+            return prev + curr.credit - curr.debit;
+        }, 0);
+
+        return res.status(200).json({
+            message: 'Ledger fetched successfully',
+            ledger,
+            balance
+        });
     } catch (error) {
         handleErrors(error, res);
     }
@@ -224,6 +279,8 @@ const getFarmerLedger = async (req, res) => {
 module.exports = {
     reqOTPFarmer,
     verifyOTPandLogin,
+    listProfiles,
+    selectProfile,
     getFarmerCollections,
     getFarmerLedger
 }
