@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken')
 const Farmer = require('../model/Farmer')
 const Collection = require('../model/Collection')
 const Ledger = require('../model/Ledger')
+const Admin = require('../model/Admin')
 
 // Controller functions for farmer app
 const reqOTPFarmer = async (req, res) => {
@@ -107,7 +108,15 @@ const listProfiles = async (req, res) => {
         if (!farmer.verified) throw createError.BadRequest('Farmer not verified')
 
         const farmersWithMobile = await Farmer.find({ mobileNumber: farmer.mobileNumber })
-            .populate('userId')
+        .populate({
+          path: 'userId',
+          select: 'username mobileNo contactPerson adminId',
+          populate: {
+            path: 'adminId', 
+            select: 'name'
+          },
+        })
+        .exec();
 
         return res.status(200).json({
             message: 'Farmer fetched successfully',
@@ -247,7 +256,7 @@ const getFarmerLedger = async (req, res) => {
         const startDateObj = new Date(startDate);
         const endDateObj = new Date(endDate);
 
-        if (startDateObj >= endDateObj) {
+        if (startDateObj > endDateObj) {
             throw createError.BadRequest('startDate should be earlier than endDate');
         }
         const ledger = await Ledger.find({
