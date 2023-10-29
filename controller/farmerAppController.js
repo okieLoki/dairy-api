@@ -160,9 +160,10 @@ const selectProfile = async (req, res) => {
                 farmerId: farmer.farmerId,
                 farmerLevel: farmer.farmerLevel,
                 admin: {
-                    admin_username: farmer.userId.username,
                     admin_mobile_number: farmer.userId.mobileNo,
                     admin_contact_person: farmer.userId.contactPerson,
+                    admin_address: farmer.userId.address,
+                    admin_org_name: farmer.userId.adminId.name,
                 }
             }
         });
