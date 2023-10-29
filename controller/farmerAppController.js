@@ -255,6 +255,9 @@ const getFarmerLedger = async (req, res) => {
             userId: farmer.userId,
             date: { $gte: startDateObj, $lte: endDateObj }
         });
+        if (ledger.length === 0) {
+            throw createError.NotFound('No Ledger Found for the specified date range');
+        }
 
         const balance = ledger.reduce((prev, curr) => {
             return prev + curr.credit - curr.debit;
