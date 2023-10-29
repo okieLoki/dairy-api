@@ -110,7 +110,7 @@ const listProfiles = async (req, res) => {
         const farmersWithMobile = await Farmer.find({ mobileNumber: farmer.mobileNumber })
         .populate({
           path: 'userId',
-          select: 'username mobileNo contactPerson adminId',
+          select: 'address username mobileNo contactPerson adminId',
           populate: {
             path: 'adminId', 
             select: 'name'
