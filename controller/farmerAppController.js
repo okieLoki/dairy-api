@@ -3,7 +3,6 @@ const handleErrors = require('../utils/handleErrors')
 const { sendOTP, generateOTP } = require('../service/otpService')
 const jwt = require('jsonwebtoken')
 const Farmer = require('../model/Farmer')
-const User = require('../model/User')
 const Collection = require('../model/Collection')
 const Ledger = require('../model/Ledger')
 
@@ -273,8 +272,6 @@ const getFarmerLedger = async (req, res) => {
         handleErrors(error, res);
     }
 };
-
-
 
 module.exports = {
     reqOTPFarmer,
