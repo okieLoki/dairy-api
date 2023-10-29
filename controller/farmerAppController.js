@@ -108,15 +108,15 @@ const listProfiles = async (req, res) => {
         if (!farmer.verified) throw createError.BadRequest('Farmer not verified')
 
         const farmersWithMobile = await Farmer.find({ mobileNumber: farmer.mobileNumber })
-        .populate({
-          path: 'userId',
-          select: 'address username mobileNo contactPerson adminId',
-          populate: {
-            path: 'adminId', 
-            select: 'name'
-          },
-        })
-        .exec();
+            .populate({
+                path: 'userId',
+                select: 'address username mobileNo contactPerson adminId',
+                populate: {
+                    path: 'adminId',
+                    select: 'name'
+                },
+            })
+            .exec();
 
         return res.status(200).json({
             message: 'Farmer fetched successfully',
@@ -136,7 +136,16 @@ const selectProfile = async (req, res) => {
 
         if (!farmer_id) throw createError.BadRequest('Farmer Id is missing')
 
-        const farmer = await Farmer.findById(farmer_id).populate('userId')
+        const farmer = await Farmer.findById(farmer_id)
+            .populate({
+                path: 'userId',
+                select: 'address username mobileNo contactPerson adminId',
+                populate: {
+                    path: 'adminId',
+                    select: 'name'
+                },
+            })
+            .exec();
 
         if (!farmer) throw createError.NotFound('Farmer not found')
 
