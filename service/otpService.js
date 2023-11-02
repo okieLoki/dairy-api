@@ -22,7 +22,7 @@ const sendOTP = async (mobileNumber, otp) => {
     const token = process.env.SMS_TOKEN;
 
     const formData = new URLSearchParams();
-    formData.append('token', token);
+    formData.append('auth_token', token);
     formData.append('to', mobileNumber);
     formData.append('text', text);
 
