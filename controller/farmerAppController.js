@@ -28,7 +28,7 @@ const reqOTPFarmer = async (req, res) => {
         const result = await farmer.save()
 
         if (result) {
-            sendOTP(mobileNumber, otp)
+            await sendOTP(mobileNumber, otp)
 
             const token = jwt.sign({
                 farmer_id: farmer._id,

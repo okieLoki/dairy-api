@@ -16,8 +16,7 @@ const generateOTP = () => {
 }
 
 const sendOTP = async (mobileNumber, otp) => {
-    console.log('Sending OTP')
-
+  
     const url = 'https://sms.aakashsms.com/sms/v3/send';
     const text = `Your OTP for Hamroo Farmer Login is ${otp}`
     const token = process.env.SMS_TOKEN;
@@ -27,7 +26,7 @@ const sendOTP = async (mobileNumber, otp) => {
     formData.append('to', mobileNumber);
     formData.append('text', text);
 
-    axios.post(url, formData)
+    await axios.post(url, formData)
         .then(response => {
             console.log('Response:', response.data);
         })
@@ -35,7 +34,6 @@ const sendOTP = async (mobileNumber, otp) => {
             console.error('Error:', error);
         });
 
-    return true
 }
 
 module.exports = {
