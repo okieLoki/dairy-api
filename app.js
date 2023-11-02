@@ -29,7 +29,9 @@ server.use(express.static('public'))
 server.set('views', path.join(__dirname, '/views'))
 server.set('view engine', 'ejs');
 
-
+server.get('/', (req, res)=>{
+  res.status(200).send('Welcome to the Hamroo API')
+})
 server.use('/api/user', userRoute)
 server.use('/api/admin', adminRoute)
 server.use('/api/farmer', farmerRoute)
